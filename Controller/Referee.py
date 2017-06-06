@@ -1,4 +1,4 @@
-import Pacman, Ghost, math
+import math
 
 class Referee(object):
 

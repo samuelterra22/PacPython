@@ -4,7 +4,6 @@
 
 import pygame, sys, random
 from pygame.locals import *
-import Pacman
 
 
 def screen_init():
@@ -27,7 +26,7 @@ def screen_init():
 
 if __name__ == '__main__':
 
-    pac = Pacman(5.0,5.0)
-
+    pac = Model.Pacman(5.0,5.0)
+    print(pac.getPosition())
 
     pass
