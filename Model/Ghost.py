@@ -1,8 +1,7 @@
 class Ghost(object):
 
-    def __init__(self, id, x, y, color, direction):
+    def __init__(self, x, y, color, direction):
 
-        self.id = id
         self.x = x
         self.y = y
         self.color = color
@@ -10,7 +9,7 @@ class Ghost(object):
 
     def getPosition(self):
 
-        return self.x, self.y, self.direction
+        return self.x, self.y
 
     def setPosition(self, x, y):
 

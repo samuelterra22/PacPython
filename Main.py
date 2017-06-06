@@ -4,7 +4,9 @@
 
 import pygame, sys, random
 from pygame.locals import *
-
+from Model.Pacman import Pacman
+from Model.Ghost import Ghost
+from Controller.Referee import Referee
 
 def screen_init():
     w = 800
@@ -26,7 +28,10 @@ def screen_init():
 
 if __name__ == '__main__':
 
-    pac = Model.Pacman(5.0,5.0)
-    print(pac.getPosition())
+    pac = Pacman(5.0, 5.0)
+    g1 = Ghost(1.0, 1.0, "blue", "down")
+    g2 = Ghost(3.0, 1.0, "red", "down")
 
-    pass
+    judge = Referee()
+
+    print(judge.testDirection(g1, pac))

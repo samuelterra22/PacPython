@@ -2,42 +2,69 @@ import math
 
 class Referee(object):
 
-    def __init__(self, pacman, g1, g2, g3, g4):
+    def getPacmanPosition(self, pacman):
 
-        self.pacman = pacman
-        self.g1 = g1
-        self.g2 = g2
-        self.g3 = g3
-        self.g4 = g4
-
-    def getPacmanPosition(self):
-        return self.pacman.getPosition()
+        return pacman.getPosition()
 
     def getGhostPosition(self, ghost):
 
-        if ghost == 1:
-            return self.g1.getPosition()
-        elif ghost == 2:
-            return self.g2.getPosition()
-        elif ghost == 3:
-            return self.g3.getPosition()
-        elif ghost == 4:
-            return self.g4.getPosition()
+        return ghost.getPosition()
 
-    def calcDist(self, ghost):
+    def calcDist(self, g_x, g_y, p_x, p_y):
 
-        pac_x, pac_y = self.getPacmanPosition()
+        return math.sqrt(math.pow((g_x - p_x), 2.0) + math.pow((g_y - p_y), 2.0))
 
-        if ghost == 1:
-            g_x, g_y, dir =  self.getGhostPosition(1)
-        elif ghost == 2:
-            g_x, g_y, dir = self.getGhostPosition(2)
-        elif ghost == 3:
-            g_x, g_y, dir = self.getGhostPosition(3)
-        elif ghost == 4:
-            g_x, g_y, dir = self.getGhostPosition(4)
+    def testDirection(self, ghost, pacman):
 
+        p_x, p_y = self.getPacmanPosition(pacman)
+        g_x, g_y = self.getGhostPosition(ghost)
+        current_dist = self.calcDist(g_x, g_y, p_x, p_y)
 
-        dist = math.sqrt( math.pow((g_x - pac_x), 2.0) + math.pow((g_y - pac_y),2.0))
+        smaller = current_dist
+        new_direction = ""
 
-        return dist
+        # Para a direita:
+
+        aux_x = g_x + 1.0
+        aux_y = g_y
+
+        new_dist = self.calcDist(aux_x, aux_y, p_x, p_y)
+
+        if new_dist < smaller:
+            smaller = new_dist
+            new_direction = "r"
+
+        # Para a esquerda:
+
+        aux_x = g_x - 1.0
+        aux_y = g_y
+
+        new_dist = self.calcDist(aux_x, aux_y, p_x, p_y)
+
+        if new_dist < smaller:
+            smaller = new_dist
+            new_direction = "l"
+
+        # Para baixo:
+
+        aux_x = g_x
+        aux_y = g_y - 1.0
+
+        new_dist = self.calcDist(aux_x, aux_y, p_x, p_y)
+
+        if new_dist < smaller:
+            smaller = new_dist
+            new_direction = "d"
+
+        # Para cima:
+
+        aux_x = g_x
+        aux_y = g_y + 1.0
+
+        new_dist = self.calcDist(aux_x, aux_y, p_x, p_y)
+
+        if new_dist < smaller:
+            smaller = new_dist
+            new_direction = "d"
+
+        return smaller, new_direction
