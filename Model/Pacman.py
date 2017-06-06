@@ -7,3 +7,7 @@ class Pacman(object):
 
     def getPosition(self):
         return self.x, self.y
+
+    def setPosition(self, x, y):
+        self.x = x
+        self.y = y

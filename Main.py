@@ -4,20 +4,30 @@
 
 import pygame, sys, random
 from pygame.locals import *
+import Pacman
 
-w = 800
-h = 480
-z = 0
 
-screen = pygame.display.set_mode((w,h))
-pygame.display.flip()
-clock = pygame.time.Clock()
+def screen_init():
+    w = 800
+    h = 480
+    z = 0
 
-while 1:
-    clock.tick(60)
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            sys.exit()
+    screen = pygame.display.set_mode((w,h))
+    pygame.display.flip()
+    clock = pygame.time.Clock()
 
-    screen.fill((0,0,0))
-    pygame.display.update()
+    while 1:
+        clock.tick(60)
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                sys.exit()
+
+        screen.fill((0,0,0))
+        pygame.display.update()
+
+if __name__ == '__main__':
+
+    pac = Pacman(5.0,5.0)
+
+
+    pass
