@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 
-import pygame, sys, random
-from pygame.locals import *
+import pygame, time
 
 pygame.init()
+
+# -------- Inicializando Variáveis -------- #
 
 # Cores
 
@@ -11,61 +12,92 @@ white = (255,255,255)
 black = (0,0,0)
 red = (255,0,0)
 yellow = (255,255,0)
+green = (0,255,0)
 
 change_rate = 10
 tick = 13
 
-# Dimensões da Tela
+# Dimensões de Tela
+
+# Tela dedicada para o Game
+
+width_game = 800
+height_game = 600
+
+# Tela total
 
 width = 800
-height = 600
-
-# Dimensões do pacman e da borda
-
-pacman_radius = 15
-border_width = 5
-
-# Limite das bordas do labirinto
-
-boundarie_maze = pacman_radius + border_width
-
-# Limites até onde o pacman pode alcançar
-
-boundarie_x_pacman = width - boundarie_maze
-boundarie_y_pacman = height - boundarie_maze
+height = 700
 
 gameDisplay = pygame.display.set_mode((width, height))
 pygame.display.set_caption("PacPython \o/")
 
-# Comando de parada do jogo
-gameExit = False
+# Dimensões do pacman e da borda
 
-# Posições iniciais do Pac-Man
-
-pacman_x = boundarie_maze
-pacman_y = height - boundarie_maze
+pacman_radius = 15
+border_width_game = 5
 
 # Variáveis para a mudança de posição do pacman
 
 pacman_x_change = 0
 pacman_y_change = 0
 
+
+# Limite das bordas do labirinto
+
+boundarie_maze = pacman_radius + border_width_game
+
+# Limites até onde o pacman pode alcançar
+
+boundarie_x_pacman = width_game - boundarie_maze
+boundarie_y_pacman = height_game - boundarie_maze
+
+# Comando de parada do jogo
+
+gameExit = False
+
+# Posições iniciais do Pac-Man
+
+pacman_x = boundarie_maze
+pacman_y = height_game - boundarie_maze
+
 # Clock para definir os Frames por segundo
 
 clock = pygame.time.Clock()
 
-# Desenha as bordas
-
-pygame.draw.line(gameDisplay, white, (0, 0),(0, height), border_width)
-pygame.draw.line(gameDisplay, white, (0, 0), (width, 0), border_width)
-pygame.draw.line(gameDisplay, white, (0, height), (width, height), border_width)
-pygame.draw.line(gameDisplay, white, (width, 0), (width, height), border_width)
+font = pygame.font.SysFont(None, 25)
 
 # Atualiza a tela
 
 pygame.display.update()
+counter = 0
 
-# Looping principal do jogo
+# -------- Fim da Inicialização de Variáveis -------- #
+
+
+def score_counter(score):
+
+    score = "Score: " + str(score)
+    screen_text = font.render(score, True, green)
+    gameDisplay.blit(screen_text, [5, 650])
+
+
+def draw_game():
+
+    # Desenha o Pacman
+
+    pygame.draw.circle(gameDisplay, yellow, (pacman_x, pacman_y), pacman_radius, 0)
+
+    # Desenha as bordas
+
+    pygame.draw.line(gameDisplay, white, (0, 0), (0, height_game), border_width_game)
+    pygame.draw.line(gameDisplay, white, (0, 0), (width_game, 0), border_width_game)
+    pygame.draw.line(gameDisplay, white, (0, height_game), (width_game, height_game), border_width_game)
+    pygame.draw.line(gameDisplay, white, (width_game, 0), (width_game, height_game), border_width_game)
+
+    score_counter(counter)
+
+# -------- Looping principal do jogo -------- #
 
 while not gameExit:
     for event in pygame.event.get():
@@ -106,9 +138,9 @@ while not gameExit:
 
     gameDisplay.fill(black)
 
-    # Desenha o Pacman
+    counter += 1
 
-    pygame.draw.circle(gameDisplay, yellow, (pacman_x,pacman_y), pacman_radius, 0)
+    draw_game()
 
     pygame.display.update()
 
@@ -116,6 +148,7 @@ while not gameExit:
 
     clock.tick(tick)
 
-
 pygame.quit()
 quit()
+
+# -------- Fim do Jogo -------- #
