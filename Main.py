@@ -5,10 +5,11 @@
 from Model.Pacman import Pacman
 from Model.Ghost import Ghost
 from Controller.Referee import Referee
+from View.Screen import Screen
 
 
 if __name__ == '__main__':
-
+    '''
     pac = Pacman(5.0, 5.0)
     g1 = Ghost(1.0, 1.0, "blue", "down")
     g2 = Ghost(3.0, 1.0, "red", "down")
@@ -16,3 +17,6 @@ if __name__ == '__main__':
     judge = Referee()
 
     print(judge.testDirection(g1, pac))
+    '''
+    Start = Screen()
+    Start.gameLoop()
