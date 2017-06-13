@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-import pygame, math, random
+import pygame, math, random, time
 
 class Referee(object):
 
@@ -17,7 +17,7 @@ class Referee(object):
         self.blue = (0, 0, 204)
 
         self.change_rate = 10
-        self.fps = 13
+        self.fps = 15
 
         # Dimensões de Tela
 
@@ -58,7 +58,7 @@ class Referee(object):
 
     # -------- Desenha o jogo, atualizando as posições -------- #
 
-    def draw_game(self, pacman_x, pacman_y, counter, capsules, barriers):
+    def draw_game(self, pacman_x, pacman_y, capsules, barriers, counter):
 
         # Pinta o fundo da tela de preto
 
@@ -66,8 +66,8 @@ class Referee(object):
 
         # Desenha as capsulas
 
-        #for i in capsules:
-        #    pygame.draw.circle(self.gameDisplay, self.yellow, (i[0],i[1]), self.capsule_radius, 0)
+        for i in capsules:
+            pygame.draw.circle(self.gameDisplay, self.yellow, (int(i[0]),int(i[1])), self.capsule_radius, 0)
 
         # Desenha as Barriers
         for i in barriers:
@@ -92,13 +92,7 @@ class Referee(object):
 
         # FPS
 
-        #if pacman_x == appleX and pacman_y == appleY:
-        #    counter += 1
-        #    pygame.draw.circle(self.gameDisplay, self.yellow, (int(appleX), int(appleY)), self.capsule_radius, 0)
-
         self.clock.tick(self.fps)
-
-        return counter
 
     # -------- Looping principal do jogo -------- #
 
@@ -133,9 +127,68 @@ class Referee(object):
         pacman_x_change = 0
         pacman_y_change = 0
 
-        capsules = [(200,200), (300,300)]
+        #Inicializa as Capsulas
 
-        #5 borda esquerda
+        capsules = []
+        dist_capsules = 20
+
+        for i in range(0,17):
+            capsules.append(((pacman_x + dist_capsules),boundarie_y_pacman))
+            dist_capsules+= 40
+
+        dist_capsules = 0
+
+        for i in range(0,20):
+            capsules.append(((46 + dist_capsules) ,26))
+            dist_capsules += 40
+
+        dist_capsules = 0
+
+        for i in range(0,11):
+            capsules.append((25,(452 - dist_capsules)))
+            capsules.append((85, (25 + dist_capsules)))
+            capsules.append((778, (158 + dist_capsules)))
+            dist_capsules += 40
+
+        dist_capsules = 0
+
+        for i in range(0,15):
+            capsules.append(((132 + dist_capsules),324))
+            dist_capsules += 40
+
+        dist_capsules = 0
+
+        for i in range(0,8):
+            capsules.append(((456 + dist_capsules),388))
+            capsules.append(((125 + dist_capsules), 85))
+            capsules.append(((125 + dist_capsules), 145))
+
+
+            dist_capsules += 40
+
+        dist_capsules = 0
+
+        for i in range(0,7):
+            capsules.append(((376 - dist_capsules),385))
+            capsules.append(((298 + dist_capsules), 473))
+            capsules.append(((565 + dist_capsules), 91))
+            capsules.append((724, (122 + dist_capsules)))
+            dist_capsules += 40
+
+        dist_capsules = 0
+
+        for i in range(0,3):
+            capsules.append((526, (49 + dist_capsules)))
+            capsules.append((526, (170 + dist_capsules)))
+            capsules.append((335, (433 + dist_capsules)))
+            capsules.append((173, (424 + dist_capsules)))
+            capsules.append(((176 + dist_capsules), 255))
+            capsules.append((696, (429 + dist_capsules)))
+            capsules.append(((12 + dist_capsules), 509))
+            dist_capsules += 40
+
+
+        #Barreiras
 
         barriers = [(100, 50, 500, 50),(60,540,300,540),(360,510,460,510),(410,510,410,550),(510,520,660,520),(730,580,730,450),
                     (5,480,70,480),(135,542,135,440),(200,416,300,416),(200,480,250,480),(359,347,460,347),(408,354,408,450),(505,412,595,412),
@@ -143,13 +196,9 @@ class Referee(object):
                     (145,203,145,303),(207,203,247,203),(526,286,556,286),(123,360,293,360),(52,414,52,134),(141,110,240,110),(146,170,200,170),
                     (562,52,780,52),(294,114,400,114),(474,136,474,66),(541,163,700,163),(620,166,620,266),(750,112,780,112),(750,335,750,200)]
 
-
-        #capsulaX = round(random.randrange(boundarie_maze, self.width_game - boundarie_maze) / 10.0) * 10.0
-        #capsulaY = round(random.randrange(boundarie_maze, self.height_game - boundarie_maze) / 10.0) * 10.0
-
         while not game_exit:
             for event in pygame.event.get():
-                print(event)
+                #print(event)
                 if event.type == pygame.QUIT:
                     game_exit = True
                 elif event.type == pygame.KEYDOWN:
@@ -183,7 +232,14 @@ class Referee(object):
             elif pacman_y < boundarie_maze:
                 pacman_y = boundarie_maze
 
-            counter = self.draw_game(pacman_x, pacman_y, counter, capsules, barriers)
+
+            for i in capsules:
+                dist = self.calcDist(pacman_x,pacman_y,i[0],i[1])
+                if dist < float(self.pacman_radius + self.capsule_radius):
+                    counter += 1
+                    capsules.remove(i)
+
+            self.draw_game(pacman_x, pacman_y, capsules, barriers, counter)
 
         # End While
         pygame.quit()
