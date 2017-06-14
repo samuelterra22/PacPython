@@ -36,7 +36,7 @@ class Referee(object):
 
         # Dimensões do pacman e da borda
 
-        self.pacman_radius = 15
+        self.pacman_radius = 13
         self.border_width_game = 5
 
         # Dimensão da cápsula
@@ -126,6 +126,9 @@ class Referee(object):
 
         pacman_x_change = 0
         pacman_y_change = 0
+        able = True
+        aux_x = -1
+        aux_y = -1
 
         #Inicializa as Capsulas
 
@@ -196,29 +199,74 @@ class Referee(object):
                     (145,203,145,303),(207,203,247,203),(526,286,556,286),(123,360,293,360),(52,414,52,134),(141,110,240,110),(146,170,200,170),
                     (562,52,780,52),(294,114,400,114),(474,136,474,66),(541,163,700,163),(620,166,620,266),(750,112,780,112),(750,335,750,200)]
 
+
+        barrier_points = []
+
+
+        for i in barriers:
+            # Barreira Horizontal
+
+            if i[1] == i[3]:
+                if i[0] > i[2]:
+                    for x in range(i[2], i[0]+1):
+                        barrier_points.append((x,i[1]))
+                else:
+                    for x in range(i[0], i[2] + 1):
+                        barrier_points.append((x, i[1]))
+
+            #  Barreira Vertical
+
+            if i[0] == i[2]:
+                if i[1] > i[3]:
+                    for y in range(i[3], i[1] + 1):
+                        barrier_points.append((i[0], y))
+                else:
+                    for y in range(i[1], i[3] + 1):
+                        barrier_points.append((i[0], y))
+
+
         while not game_exit:
             for event in pygame.event.get():
-                #print(event)
+                print(event)
                 if event.type == pygame.QUIT:
                     game_exit = True
                 elif event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_LEFT:
                         pacman_x_change = -self.change_rate
                         pacman_y_change = 0
+                        if aux_x > -1:
+                            test_dist = self.calcDist(pacman_x + pacman_x_change, pacman_y, aux_x, aux_y)
+                            if test_dist > 19.0:
+                                able = True
+
                     elif event.key == pygame.K_RIGHT:
                         pacman_x_change = self.change_rate
                         pacman_y_change = 0
+                        if aux_x > -1:
+                            test_dist = self.calcDist(pacman_x + pacman_x_change, pacman_y, aux_x, aux_y)
+                            if test_dist > 19.0:
+                                able = True
+
                     elif event.key == pygame.K_UP:
                         pacman_y_change = -self.change_rate
                         pacman_x_change = 0
+                        if aux_x > -1:
+                            test_dist = self.calcDist(pacman_x, pacman_y + pacman_y_change, aux_x, aux_y)
+                            if test_dist > 19.0:
+                                able = True
+
                     elif event.key == pygame.K_DOWN:
                         pacman_y_change = self.change_rate
                         pacman_x_change = 0
+                        if aux_x > -1:
+                            test_dist = self.calcDist(pacman_x, pacman_y + pacman_y_change, aux_x, aux_y)
+                            if test_dist > 19.0:
+                                able = True
 
             # Atualiza a posição do pacman
-
-            pacman_x += pacman_x_change
-            pacman_y += pacman_y_change
+            if able:
+                pacman_x += pacman_x_change
+                pacman_y += pacman_y_change
 
             # Verifica as bordas.
 
@@ -231,6 +279,19 @@ class Referee(object):
                 pacman_y = boundarie_y_pacman
             elif pacman_y < boundarie_maze:
                 pacman_y = boundarie_maze
+
+
+            for i in barrier_points:
+                dist = self.calcDist(pacman_x,pacman_y,i[0],i[1])
+                if dist < 19.0:
+                    pacman_y_change = 0
+                    pacman_x_change = 0
+                    able = False
+                    aux_x = i[0]
+                    aux_y = i[1]
+                    break
+                else:
+                    able = True
 
 
             for i in capsules:
