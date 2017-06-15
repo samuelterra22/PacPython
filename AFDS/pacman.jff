@@ -7,57 +7,42 @@
 			<y>253.0</y>
 			<initial/>
 		</state>
-		<state id="1" name="q1">
+		<state id="1" name="DIREITA">
 			<x>1178.0</x>
 			<y>33.0</y>
 		</state>
-		<state id="2" name="q2">
+		<state id="2" name="ESQUERDA">
 			<x>299.0</x>
 			<y>515.0</y>
 		</state>
-		<state id="3" name="q3">
+		<state id="3" name="BAIXO">
 			<x>1113.0</x>
 			<y>529.0</y>
 		</state>
-		<state id="4" name="q4">
+		<state id="4" name="CIMA">
 			<x>574.0</x>
 			<y>61.0</y>
 		</state>
 		<!--The list of transitions.-->
 		<transition>
-			<from>1</from>
-			<to>3</to>
-			<read>down</read>
-		</transition>
-		<transition>
 			<from>4</from>
 			<to>3</to>
 			<read>down</read>
-		</transition>
-		<transition>
-			<from>3</from>
-			<to>2</to>
-			<read>left</read>
-		</transition>
-		<transition>
-			<from>2</from>
-			<to>4</to>
-			<read>up</read>
-		</transition>
-		<transition>
-			<from>3</from>
-			<to>1</to>
-			<read>right</read>
 		</transition>
 		<transition>
 			<from>0</from>
+			<to>3</to>
+			<read>down</read>
+		</transition>
+		<transition>
+			<from>1</from>
 			<to>4</to>
 			<read>up</read>
 		</transition>
 		<transition>
-			<from>4</from>
-			<to>1</to>
-			<read>right</read>
+			<from>2</from>
+			<to>3</to>
+			<read>down</read>
 		</transition>
 		<transition>
 			<from>1</from>
@@ -70,22 +55,27 @@
 			<read>left</read>
 		</transition>
 		<transition>
-			<from>4</from>
-			<to>2</to>
-			<read>left</read>
-		</transition>
-		<transition>
 			<from>3</from>
 			<to>3</to>
 			<read>down</read>
 		</transition>
 		<transition>
 			<from>0</from>
+			<to>1</to>
+			<read>right</read>
+		</transition>
+		<transition>
+			<from>4</from>
 			<to>2</to>
 			<read>left</read>
 		</transition>
 		<transition>
 			<from>2</from>
+			<to>1</to>
+			<read>right</read>
+		</transition>
+		<transition>
+			<from>4</from>
 			<to>1</to>
 			<read>right</read>
 		</transition>
@@ -96,8 +86,8 @@
 		</transition>
 		<transition>
 			<from>0</from>
-			<to>1</to>
-			<read>right</read>
+			<to>2</to>
+			<read>left</read>
 		</transition>
 		<transition>
 			<from>3</from>
@@ -105,24 +95,34 @@
 			<read>up</read>
 		</transition>
 		<transition>
+			<from>3</from>
+			<to>1</to>
+			<read>right</read>
+		</transition>
+		<transition>
+			<from>4</from>
+			<to>4</to>
+			<read>up</read>
+		</transition>
+		<transition>
 			<from>2</from>
-			<to>3</to>
-			<read>down</read>
+			<to>4</to>
+			<read>up</read>
 		</transition>
 		<transition>
 			<from>1</from>
-			<to>4</to>
-			<read>up</read>
+			<to>3</to>
+			<read>down</read>
 		</transition>
 		<transition>
-			<from>4</from>
-			<to>4</to>
-			<read>up</read>
+			<from>3</from>
+			<to>2</to>
+			<read>left</read>
 		</transition>
 		<transition>
 			<from>0</from>
-			<to>3</to>
-			<read>down</read>
+			<to>4</to>
+			<read>up</read>
 		</transition>
 	</automaton>
 </structure>

@@ -2,6 +2,7 @@
 import pygame, math, random, time
 import threading as Threads
 from Controller.AFDController import AFDController
+from Model.Pacman import Pacman
 
 class Referee(object):
 
@@ -36,9 +37,8 @@ class Referee(object):
         self.gameDisplay = pygame.display.set_mode((self.width, self.height))
         pygame.display.set_caption("PacPython \o/")
 
-        # Dimensões do pacman e da borda
+        # Largura da borda
 
-        self.pacman_radius = 13
         self.border_width_game = 5
 
         # Dimensão da cápsula
@@ -53,31 +53,34 @@ class Referee(object):
 
         self.game_exit = False
 
-        # Carregamento do autômato do Pac-Man
-
-        self.pac_controller = AFDController()
-
-        self.pac_automata = self.pac_controller.load("AFDS/pacman.jff")
+        # Controle de transições do AFD do Pacman
 
         self.trans_pac_counter = 0
 
+        # Flag que controla se o pacman anda ou não.
+
         self.walk = False
 
-        self.pac_direction = None
+        # Inicializa um Pacman!!
 
+        self.pacman = Pacman()
+
+        # Controller dos Autômatos
+
+        self.aut_controller = AFDController()
 
     # -------- Contador do Placar -------- #
 
-    def score_counter(self, score):
+    def score_counter(self):
 
         font = pygame.font.SysFont(None, 25)
-        score = "Score: " + str(score)
+        score = "Score: " + str(self.pacman.getCapsules())
         screen_text = font.render(score, True, self.green)
         self.gameDisplay.blit(screen_text, [5, 650])
 
     # -------- Desenha o jogo, atualizando as posições -------- #
 
-    def draw_game(self, pacman_x, pacman_y, capsules, barriers, counter):
+    def draw_game(self, capsules, barriers):
 
         # Pinta o fundo da tela de preto
 
@@ -91,11 +94,11 @@ class Referee(object):
         # Desenha as Barriers
 
         for i in barriers:
-            pygame.draw.line(self.gameDisplay,self.blue,(i[0],i[1]),(i[2],i[3]),17)
+            pygame.draw.line(self.gameDisplay, self.blue,(i[0],i[1]),(i[2],i[3]),17)
 
         # Desenha o Pacman
 
-        pygame.draw.circle(self.gameDisplay, self.yellow, (pacman_x, pacman_y), self.pacman_radius, 0)
+        pygame.draw.circle(self.gameDisplay, self.pacman.getColor(), (self.pacman.getX(), self.pacman.getY()), self.pacman.getRadius())
 
         # Desenha as bordas
 
@@ -106,7 +109,7 @@ class Referee(object):
 
         # Desenha o placar
 
-        self.score_counter(counter)
+        self.score_counter()
 
         pygame.display.update()
 
@@ -124,11 +127,12 @@ class Referee(object):
 
             if self.walk:
                 if self.trans_pac_counter == 0:
-                    self.trans_pac_counter = self.pac_controller.move(self.pac_automata, 0, self.pac_direction)
+                    self.trans_pac_counter = self.aut_controller.move(self.pacman.getAFD(), 0, self.pacman.getDirection())
                 else:
-                    self.trans_pac_counter = self.pac_controller.move(self.pac_automata, self.trans_pac_counter, self.pac_direction)
+                    self.trans_pac_counter = self.aut_controller.move(self.pacman.getAFD(), self.trans_pac_counter, self.pacman.getDirection())
 
             print("Estado: " + str(self.trans_pac_counter))
+
         # Fim do Jogo
 
     # -------- Looping principal do jogo -------- #
@@ -152,18 +156,17 @@ class Referee(object):
 
         pygame.init()
 
-        # Contador do Placar
-
-        counter = 0
-
         # Limite das bordas do labirinto
 
-        boundarie_maze = self.pacman_radius + self.border_width_game
+        boundarie_maze = self.pacman.getRadius() + self.border_width_game
 
         # Posições iniciais do Pac-Man
 
-        pacman_x = boundarie_maze
-        pacman_y = self.height_game - boundarie_maze
+        self.pacman.setX(boundarie_maze)
+        self.pacman.setY(self.height_game - boundarie_maze)
+
+        # pacman_x = boundarie_maze
+        # pacman_y = self.height_game - boundarie_maze
 
         # Limites até onde o pacman pode alcançar
 
@@ -184,7 +187,7 @@ class Referee(object):
         dist_capsules = 20
 
         for i in range(0,17):
-            capsules.append(((pacman_x + dist_capsules), boundarie_y_pacman))
+            capsules.append(((self.pacman.getX() + dist_capsules), boundarie_y_pacman))
             dist_capsules+= 40
 
         dist_capsules = 0
@@ -284,65 +287,65 @@ class Referee(object):
                     if event.key == pygame.K_LEFT:
                         pacman_x_change = -self.change_rate
                         pacman_y_change = 0
-                        self.pac_direction = "left"
+                        self.pacman.setDirection("left")
                         if aux_x > -1:
-                            test_dist = self.calcDist(pacman_x + pacman_x_change, pacman_y, aux_x, aux_y)
+                            test_dist = self.calcDist(self.pacman.getX() + pacman_x_change, self.pacman.getY(), aux_x, aux_y)
                             if test_dist > 19.0:
                                 able = True
 
                     elif event.key == pygame.K_RIGHT:
                         pacman_x_change = self.change_rate
                         pacman_y_change = 0
-                        self.pac_direction = "right"
+                        self.pacman.setDirection("right")
                         if aux_x > -1:
-                            test_dist = self.calcDist(pacman_x + pacman_x_change, pacman_y, aux_x, aux_y)
+                            test_dist = self.calcDist(self.pacman.getX() + pacman_x_change, self.pacman.getY(), aux_x, aux_y)
                             if test_dist > 19.0:
                                 able = True
 
                     elif event.key == pygame.K_UP:
                         pacman_y_change = -self.change_rate
                         pacman_x_change = 0
-                        self.pac_direction = "up"
+                        self.pacman.setDirection("up")
                         if aux_x > -1:
-                            test_dist = self.calcDist(pacman_x, pacman_y + pacman_y_change, aux_x, aux_y)
+                            test_dist = self.calcDist(self.pacman.getX(), self.pacman.getY() + pacman_y_change, aux_x, aux_y)
                             if test_dist > 19.0:
                                 able = True
 
                     elif event.key == pygame.K_DOWN:
                         pacman_y_change = self.change_rate
                         pacman_x_change = 0
-                        self.pac_direction = "down"
+                        self.pacman.setDirection("down")
                         if aux_x > -1:
-                            test_dist = self.calcDist(pacman_x, pacman_y + pacman_y_change, aux_x, aux_y)
+                            test_dist = self.calcDist(self.pacman.getX(), self.pacman.getY() + pacman_y_change, aux_x, aux_y)
                             if test_dist > 19.0:
                                 able = True
 
                 # Se nenhuma tecla foi pressionada
                 else:
                     self.walk = False
-                    self.pac_direction  = None
+                    self.pacman.setDirection("None")
 
             # Atualiza a posição do pacman
             if able:
-                pacman_x += pacman_x_change
-                pacman_y += pacman_y_change
+                self.pacman.setX(self.pacman.getX() + pacman_x_change)
+                self.pacman.setY(self.pacman.getY() + pacman_y_change)
 
             # Verifica as bordas.
 
-            if pacman_x > boundarie_x_pacman:
-                pacman_x = boundarie_x_pacman
-            elif pacman_x < boundarie_maze:
-                pacman_x = boundarie_maze
+            if self.pacman.getX() > boundarie_x_pacman:
+                self.pacman.setX(boundarie_x_pacman)
+            elif self.pacman.getX() < boundarie_maze:
+                self.pacman.setX(boundarie_maze)
 
-            if pacman_y > boundarie_y_pacman:
-                pacman_y = boundarie_y_pacman
-            elif pacman_y < boundarie_maze:
-                pacman_y = boundarie_maze
+            if self.pacman.getY() > boundarie_y_pacman:
+                self.pacman.setY(boundarie_y_pacman)
+            elif self.pacman.getY() < boundarie_maze:
+                self.pacman.setY(boundarie_maze)
 
             # Verifica a coolisão com barreiras.
 
             for i in barrier_points:
-                dist = self.calcDist(pacman_x,pacman_y,i[0],i[1])
+                dist = self.calcDist(self.pacman.getX(), self.pacman.getY(), i[0], i[1])
                 if dist < 19.0:
                     pacman_y_change = 0
                     pacman_x_change = 0
@@ -356,14 +359,14 @@ class Referee(object):
             # Verifica o ingerir de capsulas
 
             for i in capsules:
-                dist = self.calcDist(pacman_x,pacman_y,i[0],i[1])
-                if dist < float(self.pacman_radius + self.capsule_radius):
-                    counter += 1
+                dist = self.calcDist(self.pacman.getX(), self.pacman.getY(), i[0], i[1])
+                if dist < float(self.pacman.getRadius() + self.capsule_radius):
+                    self.pacman.setCapsules(self.pacman.getCapsules() + 1)
                     capsules.remove(i)
 
             # Atualiza o Cenário
 
-            self.draw_game(pacman_x, pacman_y, capsules, barriers, counter)
+            self.draw_game(capsules, barriers)
 
         # End While
         pygame.quit()
