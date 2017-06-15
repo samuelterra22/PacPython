@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import pygame, math, random, time
+from Controller.AFDController import AFDController
 
 class Referee(object):
 
@@ -47,6 +48,19 @@ class Referee(object):
 
         self.clock = pygame.time.Clock()
 
+        # Comando de parada do jogo
+
+        self.game_exit = False
+
+        # Carregamento do autômato do Pac-Man
+
+        self.pac_controller = AFDController()
+
+        self.pac_automata = self.pac_controller.load("AFDS/pacman.jff")
+
+        self.trans_pac_counter = 0
+
+
     # -------- Contador do Placar -------- #
 
     def score_counter(self, score):
@@ -70,6 +84,7 @@ class Referee(object):
             pygame.draw.circle(self.gameDisplay, self.yellow, (int(i[0]),int(i[1])), self.capsule_radius, 0)
 
         # Desenha as Barriers
+
         for i in barriers:
             pygame.draw.line(self.gameDisplay,self.blue,(i[0],i[1]),(i[2],i[3]),17)
 
@@ -94,15 +109,25 @@ class Referee(object):
 
         self.clock.tick(self.fps)
 
+    # -------- Executa o autômato do Pac-man -------- #
+
+    def pacman_automata(self, direction, walk):
+
+        # Se o pacman andou, o estado muda
+
+        if walk:
+            if self.trans_pac_counter == 0:
+                self.trans_pac_counter = self.pac_controller.move(self.pac_automata, 0, direction)
+            else:
+                self.trans_pac_counter = self.pac_controller.move(self.pac_automata, self.trans_pac_counter, direction)
+
+        print("Estado: " + str(self.trans_pac_counter))
+
     # -------- Looping principal do jogo -------- #
 
     def gameLoop(self):
 
         pygame.init()
-
-        # Comando de parada do jogo
-
-        game_exit = False
 
         # Contador do Placar
 
@@ -162,17 +187,16 @@ class Referee(object):
         dist_capsules = 0
 
         for i in range(0,8):
-            capsules.append(((456 + dist_capsules),388))
+            capsules.append(((456 + dist_capsules), 388))
             capsules.append(((125 + dist_capsules), 85))
             capsules.append(((125 + dist_capsules), 145))
-
 
             dist_capsules += 40
 
         dist_capsules = 0
 
         for i in range(0,7):
-            capsules.append(((376 - dist_capsules),385))
+            capsules.append(((376 - dist_capsules), 385))
             capsules.append(((298 + dist_capsules), 473))
             capsules.append(((565 + dist_capsules), 91))
             capsules.append((724, (122 + dist_capsules)))
@@ -190,20 +214,21 @@ class Referee(object):
             capsules.append(((12 + dist_capsules), 509))
             dist_capsules += 40
 
+        # Barreiras
 
-        #Barreiras
-
-        barriers = [(100, 50, 500, 50),(60,540,300,540),(360,510,460,510),(410,510,410,550),(510,520,660,520),(730,580,730,450),
-                    (5,480,70,480),(135,542,135,440),(200,416,300,416),(200,480,250,480),(359,347,460,347),(408,354,408,450),(505,412,595,412),
-                    (654,523,654,460),(580,518,580,468),(688,344,688,244),(553,286,688,286),(300,280,300,200),(292,280,470,280),(470,288,470,200),
-                    (145,203,145,303),(207,203,247,203),(526,286,556,286),(123,360,293,360),(52,414,52,134),(141,110,240,110),(146,170,200,170),
-                    (562,52,780,52),(294,114,400,114),(474,136,474,66),(541,163,700,163),(620,166,620,266),(750,112,780,112),(750,335,750,200)]
+        barriers = [(100, 50, 500, 50), (60, 540, 300, 540), (360, 510, 460, 510), (410, 510, 410, 550), (510, 520, 660, 520), (730, 580, 730, 450),
+                    (5, 480, 70, 480), (135, 542, 135, 440), (200, 416, 300, 416), (200, 480, 250, 480), (359, 347, 460, 347), (408, 354, 408, 450),
+                    (505, 412, 595, 412), (654, 523, 654, 460), (580, 518, 580, 468), (688, 344, 688, 244), (553, 286, 688, 286), (300, 280, 300, 200),
+                    (292, 280, 470, 280), (470, 288, 470, 200), (145, 203, 145, 303), (207, 203, 247, 203), (526, 286, 556, 286), (123, 360, 293, 360),
+                    (52, 414, 52, 134), (141, 110, 240, 110), (146, 170, 200, 170), (562, 52, 780, 52), (294, 114, 400, 114), (474, 136, 474, 66),
+                    (541, 163, 700, 163), (620, 166, 620, 266), (750, 112, 780, 112), (750, 335, 750, 200)]
 
 
         barrier_points = []
 
 
         for i in barriers:
+
             # Barreira Horizontal
 
             if i[1] == i[3]:
@@ -225,15 +250,18 @@ class Referee(object):
                         barrier_points.append((i[0], y))
 
 
-        while not game_exit:
+        while not self.game_exit:
+            walk = False
             for event in pygame.event.get():
-                print(event)
+                # print(event)
                 if event.type == pygame.QUIT:
-                    game_exit = True
+                    self.game_exit = True
                 elif event.type == pygame.KEYDOWN:
+                    walk = True
                     if event.key == pygame.K_LEFT:
                         pacman_x_change = -self.change_rate
                         pacman_y_change = 0
+                        self.pacman_automata("left",walk)
                         if aux_x > -1:
                             test_dist = self.calcDist(pacman_x + pacman_x_change, pacman_y, aux_x, aux_y)
                             if test_dist > 19.0:
@@ -242,6 +270,7 @@ class Referee(object):
                     elif event.key == pygame.K_RIGHT:
                         pacman_x_change = self.change_rate
                         pacman_y_change = 0
+                        self.pacman_automata("right", walk)
                         if aux_x > -1:
                             test_dist = self.calcDist(pacman_x + pacman_x_change, pacman_y, aux_x, aux_y)
                             if test_dist > 19.0:
@@ -250,6 +279,7 @@ class Referee(object):
                     elif event.key == pygame.K_UP:
                         pacman_y_change = -self.change_rate
                         pacman_x_change = 0
+                        self.pacman_automata("up", walk)
                         if aux_x > -1:
                             test_dist = self.calcDist(pacman_x, pacman_y + pacman_y_change, aux_x, aux_y)
                             if test_dist > 19.0:
@@ -258,10 +288,16 @@ class Referee(object):
                     elif event.key == pygame.K_DOWN:
                         pacman_y_change = self.change_rate
                         pacman_x_change = 0
+                        self.pacman_automata("down", walk)
                         if aux_x > -1:
                             test_dist = self.calcDist(pacman_x, pacman_y + pacman_y_change, aux_x, aux_y)
                             if test_dist > 19.0:
                                 able = True
+
+                # Se nenhuma tecla foi pressionada
+                else:
+                    walk = False
+                    self.pacman_automata(None, walk)
 
             # Atualiza a posição do pacman
             if able:
@@ -280,6 +316,7 @@ class Referee(object):
             elif pacman_y < boundarie_maze:
                 pacman_y = boundarie_maze
 
+            # Verifica a coolisão com barreiras.
 
             for i in barrier_points:
                 dist = self.calcDist(pacman_x,pacman_y,i[0],i[1])
@@ -293,12 +330,15 @@ class Referee(object):
                 else:
                     able = True
 
+            # Verifica o ingerir de capsulas
 
             for i in capsules:
                 dist = self.calcDist(pacman_x,pacman_y,i[0],i[1])
                 if dist < float(self.pacman_radius + self.capsule_radius):
                     counter += 1
                     capsules.remove(i)
+
+            # Atualiza o Cenário
 
             self.draw_game(pacman_x, pacman_y, capsules, barriers, counter)
 
