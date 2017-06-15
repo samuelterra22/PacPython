@@ -18,4 +18,4 @@ if __name__ == '__main__':
     '''
     Start = Referee()
     # Start.pacman_automata(1,1)
-    Start.gameLoop()
+    Start.thread_trigger()

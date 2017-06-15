@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import pygame, math, random, time
+import threading as Threads
 from Controller.AFDController import AFDController
 
 class Referee(object):
@@ -60,6 +61,10 @@ class Referee(object):
 
         self.trans_pac_counter = 0
 
+        self.walk = False
+
+        self.pac_direction = None
+
 
     # -------- Contador do Placar -------- #
 
@@ -111,19 +116,37 @@ class Referee(object):
 
     # -------- Executa o autômato do Pac-man -------- #
 
-    def pacman_automata(self, direction, walk):
+    def pacman_automata(self):
 
         # Se o pacman andou, o estado muda
 
-        if walk:
-            if self.trans_pac_counter == 0:
-                self.trans_pac_counter = self.pac_controller.move(self.pac_automata, 0, direction)
-            else:
-                self.trans_pac_counter = self.pac_controller.move(self.pac_automata, self.trans_pac_counter, direction)
+        while not self.game_exit:
 
-        print("Estado: " + str(self.trans_pac_counter))
+            if self.walk:
+                if self.trans_pac_counter == 0:
+                    self.trans_pac_counter = self.pac_controller.move(self.pac_automata, 0, self.pac_direction)
+                else:
+                    self.trans_pac_counter = self.pac_controller.move(self.pac_automata, self.trans_pac_counter, self.pac_direction)
+
+            print("Estado: " + str(self.trans_pac_counter))
+        # Fim do Jogo
 
     # -------- Looping principal do jogo -------- #
+
+    def thread_trigger(self):
+
+        # Dispara as Threads
+
+        # Thread AFD pacman
+
+        t_pacman = Threads.Thread(target=self.pacman_automata, args=())
+
+        # Thread Game Loop
+
+        t_game = Threads.Thread(target=self.gameLoop, args=())
+
+        t_game.start()
+        t_pacman.start()
 
     def gameLoop(self):
 
@@ -161,13 +184,13 @@ class Referee(object):
         dist_capsules = 20
 
         for i in range(0,17):
-            capsules.append(((pacman_x + dist_capsules),boundarie_y_pacman))
+            capsules.append(((pacman_x + dist_capsules), boundarie_y_pacman))
             dist_capsules+= 40
 
         dist_capsules = 0
 
         for i in range(0,20):
-            capsules.append(((46 + dist_capsules) ,26))
+            capsules.append(((46 + dist_capsules) , 26))
             dist_capsules += 40
 
         dist_capsules = 0
@@ -223,6 +246,7 @@ class Referee(object):
                     (52, 414, 52, 134), (141, 110, 240, 110), (146, 170, 200, 170), (562, 52, 780, 52), (294, 114, 400, 114), (474, 136, 474, 66),
                     (541, 163, 700, 163), (620, 166, 620, 266), (750, 112, 780, 112), (750, 335, 750, 200)]
 
+        # Todos os pontos do mapa que contém um obstáculo
 
         barrier_points = []
 
@@ -251,17 +275,16 @@ class Referee(object):
 
 
         while not self.game_exit:
-            walk = False
             for event in pygame.event.get():
                 # print(event)
                 if event.type == pygame.QUIT:
                     self.game_exit = True
                 elif event.type == pygame.KEYDOWN:
-                    walk = True
+                    self.walk = True
                     if event.key == pygame.K_LEFT:
                         pacman_x_change = -self.change_rate
                         pacman_y_change = 0
-                        self.pacman_automata("left",walk)
+                        self.pac_direction = "left"
                         if aux_x > -1:
                             test_dist = self.calcDist(pacman_x + pacman_x_change, pacman_y, aux_x, aux_y)
                             if test_dist > 19.0:
@@ -270,7 +293,7 @@ class Referee(object):
                     elif event.key == pygame.K_RIGHT:
                         pacman_x_change = self.change_rate
                         pacman_y_change = 0
-                        self.pacman_automata("right", walk)
+                        self.pac_direction = "right"
                         if aux_x > -1:
                             test_dist = self.calcDist(pacman_x + pacman_x_change, pacman_y, aux_x, aux_y)
                             if test_dist > 19.0:
@@ -279,7 +302,7 @@ class Referee(object):
                     elif event.key == pygame.K_UP:
                         pacman_y_change = -self.change_rate
                         pacman_x_change = 0
-                        self.pacman_automata("up", walk)
+                        self.pac_direction = "up"
                         if aux_x > -1:
                             test_dist = self.calcDist(pacman_x, pacman_y + pacman_y_change, aux_x, aux_y)
                             if test_dist > 19.0:
@@ -288,7 +311,7 @@ class Referee(object):
                     elif event.key == pygame.K_DOWN:
                         pacman_y_change = self.change_rate
                         pacman_x_change = 0
-                        self.pacman_automata("down", walk)
+                        self.pac_direction = "down"
                         if aux_x > -1:
                             test_dist = self.calcDist(pacman_x, pacman_y + pacman_y_change, aux_x, aux_y)
                             if test_dist > 19.0:
@@ -296,8 +319,8 @@ class Referee(object):
 
                 # Se nenhuma tecla foi pressionada
                 else:
-                    walk = False
-                    self.pacman_automata(None, walk)
+                    self.walk = False
+                    self.pac_direction  = None
 
             # Atualiza a posição do pacman
             if able:
