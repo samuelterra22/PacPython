@@ -71,9 +71,16 @@ class Referee(object):
         # Inicializa os fantasmas
 
         self.red_ghost = Ghost(self.red)
+        self.trans_red_counter = 0
+
         self.blue_ghost = Ghost(self.blue)
+        self.trans_blue_counter = 0
+
         self.orange_ghost = Ghost(self.orange)
+        self.trans_orange_counter = 0
+
         self.purple_ghost = Ghost(self.purple)
+        self.trans_purple_counter = 0
 
 
         # Controller dos Autômatos
@@ -150,26 +157,72 @@ class Referee(object):
                 else:
                     self.trans_pac_counter = self.aut_controller.move(self.pacman.getAFD(), self.trans_pac_counter, self.pacman.getDirection())
 
-            #print("Estado: " + str(self.trans_pac_counter))
+                #print("Estado: " + str(self.trans_pac_counter))
 
         # Fim do Jogo
 
-    def ghosts_automata(self, afd):
+    def red_automata(self):
 
         while not self.game_exit:
 
-            if self.walk:
-                if self.trans_pac_counter == 0:
-                    self.trans_pac_counter = self.aut_controller.move(self.pacman.getAFD(), 0,
-                                                                      self.pacman.getDirection())
-                else:
-                    self.trans_pac_counter = self.aut_controller.move(self.pacman.getAFD(),
-                                                                      self.trans_pac_counter,
-                                                                      self.pacman.getDirection())
+            if self.trans_red_counter == 0:
+                self.trans_red_counter = self.aut_controller.move(self.pacman.getAFD(), 0,
+                                                                  self.pacman.getDirection())
+            else:
+                self.trans_red_counter = self.aut_controller.move(self.pacman.getAFD(),
+                                                                  self.trans_pac_counter,
+                                                                  self.pacman.getDirection())
 
-                    # print("Estado: " + str(self.trans_pac_counter))
+            # print("Estado: " + str(self.trans_pac_counter))
 
-                    # Fim do Jogo
+                # Fim do Jogo
+
+    def blue_automata(self):
+
+        while not self.game_exit:
+
+            if self.trans_blue_counter == 0:
+                self.trans_blue_counter = self.aut_controller.move(self.pacman.getAFD(), 0,
+                                                                    self.pacman.getDirection())
+            else:
+                self.trans_blue_counter = self.aut_controller.move(self.pacman.getAFD(),
+                                                                    self.trans_pac_counter,
+                                                                    self.pacman.getDirection())
+
+            # print("Estado: " + str(self.trans_pac_counter))
+
+                # Fim do Jogo
+
+    def orange_automata(self):
+
+        while not self.game_exit:
+
+            if self.trans_orange_counter == 0:
+                self.trans_orange_counter = self.aut_controller.move(self.pacman.getAFD(), 0,
+                                                                    self.pacman.getDirection())
+            else:
+                self.trans_orange_counter = self.aut_controller.move(self.pacman.getAFD(),
+                                                                    self.trans_pac_counter,
+                                                                    self.pacman.getDirection())
+
+            # print("Estado: " + str(self.trans_pac_counter))
+
+                # Fim do Jogo
+
+    def purple_automata(self):
+
+        while not self.game_exit:
+
+            if self.trans_purple_counter == 0:
+                self.trans_purple_counter = self.aut_controller.move(self.pacman.getAFD(), 0,
+                                                                    self.pacman.getDirection())
+            else:
+                self.trans_purple_counter = self.aut_controller.move(self.pacman.getAFD(),
+                                                                    self.trans_pac_counter,
+                                                                    self.pacman.getDirection())
+            # print("Estado: " + str(self.trans_pac_counter))
+
+                # Fim do Jogo
 
     # -------- Looping principal do jogo -------- #
 
@@ -220,10 +273,23 @@ class Referee(object):
         boundarie_x_pacman = self.width_game - boundarie_maze
         boundarie_y_pacman = self.height_game - boundarie_maze
 
-        # Variáveis para a mudança de posição do pacman
+        # Variáveis para a mudança de posição do pacman e dos Ghosts
 
         pacman_x_change = 0
         pacman_y_change = 0
+
+        red_x_change = 0
+        red_y_change = 0
+
+        blue_x_change = 0
+        blue_y_change = 0
+
+        orange_x_change = 0
+        orange_y_change = 0
+
+        purple_x_change = 0
+        purple_y_change = 0
+
         able = True
         aux_x = -1
         aux_y = -1
@@ -289,44 +355,71 @@ class Referee(object):
 
         # Barreiras
 
-        barriers = [(100, 50, 500, 50), (60, 540, 300, 540), (360, 510, 460, 510), (410, 510, 410, 550), (510, 520, 660, 520), (730, 580, 730, 450),
-                    (5, 480, 70, 480), (135, 542, 135, 440), (200, 416, 300, 416), (200, 480, 250, 480), (359, 347, 460, 347), (408, 354, 408, 450),
-                    (505, 412, 595, 412), (654, 523, 654, 460), (580, 518, 580, 468), (688, 344, 688, 244), (553, 286, 688, 286), (300, 280, 300, 200),
-                    (292, 280, 470, 280), (470, 288, 470, 200), (145, 203, 145, 303), (207, 203, 247, 203), (526, 286, 556, 286), (123, 360, 293, 360),
-                    (52, 414, 52, 134), (141, 110, 240, 110), (146, 170, 200, 170), (562, 52, 780, 52), (294, 114, 400, 114), (474, 136, 474, 66),
-                    (541, 163, 700, 163), (620, 166, 620, 266), (750, 112, 780, 112), (750, 335, 750, 200)]
+        barriers = [(100, 50, 479, 50), (60, 540, 300, 540), (360, 510, 460, 510), (410, 510, 410, 550), (510, 520, 660, 520), (730, 580, 730, 450),
+                     (5, 480, 70, 480), (135, 542, 135, 440), (200, 416, 300, 416), (200, 480, 250, 480), (359, 347, 460, 347), (408, 354, 408, 450),
+                     (505, 412, 595, 412), (654, 523, 654, 460), (580, 518, 580, 468), (688, 344, 688, 244), (553, 286, 688, 286), (300, 280, 300, 200),
+                     (292, 280, 470, 280), (470, 288, 470, 200), (145, 203, 145, 303), (207, 203, 247, 203), (526, 286, 556, 286), (123, 360, 293, 360),
+                     (52, 414, 52, 134), (141, 110, 240, 110), (146, 170, 200, 170), (562, 52, 780, 52), (294, 114, 400, 114), (474, 136, 474, 66),
+                     (541, 163, 700, 163), (620, 166, 620, 266), (750, 112, 780, 112), (750, 335, 750, 200)]
+
+        # barriers = [(100, 50, 500, 50), (60, 550, 300, 550), (360, 510, 460, 510), (410, 510, 410, 550),
+        #             (510, 520, 660, 520), (730, 580, 730, 450),
+        #             (5, 480, 70, 480), (135, 540, 135, 440), (200, 420, 300, 420), (200, 480, 250, 480),
+        #             (360, 350, 460, 350), (410, 350, 410, 450),
+        #             (505, 410, 595, 410), (650, 520, 650, 460), (580, 520, 580, 470), (670, 345, 670, 245),
+        #             (555, 285, 690, 285), (300, 280, 300, 200),
+        #             (290, 280, 470, 280), (470, 290, 470, 200), (145, 205, 145, 305), (205, 205, 250, 205),
+        #             (525, 285, 555, 285), (125, 360, 295, 360),
+        #             (50, 415, 50, 135), (140, 110, 240, 110), (145, 170, 200, 170), (560, 50, 780, 50),
+        #             (295, 115, 400, 115), (475, 135, 475, 65),
+        #             (540, 165, 700, 165), (620, 165, 620, 265), (750, 110, 780, 110), (750, 335, 750, 200)]
 
         # Todos os pontos do mapa que contém um obstáculo
 
         barrier_points = []
-
+        barrier_points1 = []
+        barrier_points2 = []
 
         for i in barriers:
-
             # Barreira Horizontal
 
             if i[1] == i[3]:
                 if i[0] > i[2]:
                     for x in range(i[2], i[0]+1):
-                        barrier_points.append((x,i[1]))
+                        barrier_points.append((x, i[1]))
+
                 else:
                     for x in range(i[0], i[2] + 1):
                         barrier_points.append((x, i[1]))
 
-            #  Barreira Vertical
+
+             #Barreira Vertical
 
             if i[0] == i[2]:
                 if i[1] > i[3]:
                     for y in range(i[3], i[1] + 1):
                         barrier_points.append((i[0], y))
+
                 else:
                     for y in range(i[1], i[3] + 1):
                         barrier_points.append((i[0], y))
 
+        # Ordena a lista de obstáculos pelo valor de x (x,y)
+
+        barrier_points.sort(key=lambda tup:tup[0])
+
+        # Divide a lista ao meio para acelerar o processamento
+
+        for i in range(0, 1981):
+             barrier_points1.append(barrier_points[i])
+
+        for i in range(1981, 3962):
+             barrier_points2.append(barrier_points[i])
+
 
         while not self.game_exit:
             for event in pygame.event.get():
-                # print(event)
+                #print(event)
                 if event.type == pygame.QUIT:
                     self.game_exit = True
                 elif event.type == pygame.KEYDOWN:
@@ -335,6 +428,7 @@ class Referee(object):
                         pacman_x_change = -self.change_rate
                         pacman_y_change = 0
                         self.pacman.setDirection("left")
+                        # Testa se está tentando atravessar a parede.
                         if aux_x > -1:
                             test_dist = self.calcDist(self.pacman.getX() + pacman_x_change, self.pacman.getY(), aux_x, aux_y)
                             if test_dist > 19.0:
@@ -344,6 +438,7 @@ class Referee(object):
                         pacman_x_change = self.change_rate
                         pacman_y_change = 0
                         self.pacman.setDirection("right")
+                        # Testa se está tentando atravessar a parede.
                         if aux_x > -1:
                             test_dist = self.calcDist(self.pacman.getX() + pacman_x_change, self.pacman.getY(), aux_x, aux_y)
                             if test_dist > 19.0:
@@ -353,6 +448,7 @@ class Referee(object):
                         pacman_y_change = -self.change_rate
                         pacman_x_change = 0
                         self.pacman.setDirection("up")
+                        # Testa se está tentando atravessar a parede.
                         if aux_x > -1:
                             test_dist = self.calcDist(self.pacman.getX(), self.pacman.getY() + pacman_y_change, aux_x, aux_y)
                             if test_dist > 19.0:
@@ -362,6 +458,7 @@ class Referee(object):
                         pacman_y_change = self.change_rate
                         pacman_x_change = 0
                         self.pacman.setDirection("down")
+                        # Testa se está tentando atravessar a parede.
                         if aux_x > -1:
                             test_dist = self.calcDist(self.pacman.getX(), self.pacman.getY() + pacman_y_change, aux_x, aux_y)
                             if test_dist > 19.0:
@@ -381,27 +478,37 @@ class Referee(object):
 
             if self.pacman.getX() > boundarie_x_pacman:
                 self.pacman.setX(boundarie_x_pacman)
+                self.walk = False
             elif self.pacman.getX() < boundarie_maze:
                 self.pacman.setX(boundarie_maze)
-
+                self.walk = False
             if self.pacman.getY() > boundarie_y_pacman:
                 self.pacman.setY(boundarie_y_pacman)
+                self.walk = False
             elif self.pacman.getY() < boundarie_maze:
                 self.pacman.setY(boundarie_maze)
+                self.walk = False
 
             # Verifica a coolisão com barreiras.
 
-            for i in barrier_points:
+
+            if self.pacman.getX() > barrier_points1[1980][0]:
+                b_points = barrier_points2
+            else: b_points = barrier_points1
+
+            for i in b_points:
                 dist = self.calcDist(self.pacman.getX(), self.pacman.getY(), i[0], i[1])
                 if dist < 19.0:
                     pacman_y_change = 0
                     pacman_x_change = 0
                     able = False
+                    self.walk = False
                     aux_x = i[0]
                     aux_y = i[1]
                     break
                 else:
                     able = True
+
 
             # Verifica o ingerir de capsulas
 
@@ -424,57 +531,59 @@ class Referee(object):
 
         return math.sqrt(math.pow((g_x - p_x), 2.0) + math.pow((g_y - p_y), 2.0))
 
-    # def testDirection(self, ghost, pacman):
-    #
-    #     p_x, p_y = self.getPacmanPosition(pacman)
-    #     g_x, g_y = self.getGhostPosition(ghost)
-    #     current_dist = self.calcDist(g_x, g_y, p_x, p_y)
-    #
-    #     smaller = current_dist
-    #     new_direction = ""
-    #
-    #     # Para a direita:
-    #
-    #     aux_x = g_x + 1.0
-    #     aux_y = g_y
-    #
-    #     new_dist = self.calcDist(aux_x, aux_y, p_x, p_y)
-    #
-    #     if new_dist < smaller:
-    #         smaller = new_dist
-    #         new_direction = "r"
-    #
-    #     # Para a esquerda:
-    #
-    #     aux_x = g_x - 1.0
-    #     aux_y = g_y
-    #
-    #     new_dist = self.calcDist(aux_x, aux_y, p_x, p_y)
-    #
-    #     if new_dist < smaller:
-    #         smaller = new_dist
-    #         new_direction = "l"
-    #
-    #     # Para baixo:
-    #
-    #     aux_x = g_x
-    #     aux_y = g_y - 1.0
-    #
-    #     new_dist = self.calcDist(aux_x, aux_y, p_x, p_y)
-    #
-    #     if new_dist < smaller:
-    #         smaller = new_dist
-    #         new_direction = "d"
-    #
-    #     # Para cima:
-    #
-    #     aux_x = g_x
-    #     aux_y = g_y + 1.0
-    #
-    #     new_dist = self.calcDist(aux_x, aux_y, p_x, p_y)
-    #
-    #     if new_dist < smaller:
-    #         smaller = new_dist
-    #         new_direction = "d"
-    #
-    #     return smaller, new_direction
+    def controlRed(self, barrier_points):
+
+        can_walk = True
+
+        red_x = self.red_ghost.getX()
+        red_y = self.red_ghost.gety()
+
+        pac_x = self.pacman.getX()
+        pac_y = self.pacman.gety()
+
+        current_distance = self.calcDist(pac_x, pac_y, red_x, red_y)
+
+        smaller = current_distance
+
+        # Testa para a direita
+
+        aux = red_x + self.change_rate
+
+        new_distance = self.calcDist(pac_x, pac_y, aux, red_y)
+
+        if new_distance < smaller:
+
+
+
+            smaller = new_distance
+            new_direction = "right"
+
+        # Testa para a Esquerda
+
+        aux = red_x - self.change_rate
+
+        new_distance = self.calcDist(pac_x, pac_y, aux, red_y)
+
+        if new_distance < smaller:
+            smaller = new_distance
+            new_direction = "left"
+
+        # Testa para cima
+
+        aux = red_y - self.change_rate
+
+        new_distance = self.calcDist(pac_x, pac_y, red_x, aux)
+
+        if new_distance < smaller:
+            smaller = new_distance
+            new_direction = "up"
+
+        # Testa para baixo
+
+        aux = red_y + self.change_rate
+
+        new_distance = self.calcDist(pac_x, pac_y, red_x, aux)
+
+        if new_distance < smaller:
+            smaller = new_distance
+            new_direction = "down"

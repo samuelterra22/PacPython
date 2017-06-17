@@ -6,14 +6,14 @@ class Ghost(object):
     def __init__(self, color):
         self.radius = 10
         self.color = color
-        #self.afd = self.build_afd()
+        self.afd = self.build_afd()
         self.x = 0
         self.y = 0
         self.current_direction = "None"
 
     def build_afd(self):
         pac_controller = AFDController()
-        return pac_controller.load("AFDS/pacman.jff")
+        return pac_controller.load("AFDS/automata.jff")
 
     def getRadius(self):
         return self.radius
