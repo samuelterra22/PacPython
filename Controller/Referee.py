@@ -3,6 +3,7 @@ import pygame, math, random, time
 import threading as Threads
 from Controller.AFDController import AFDController
 from Model.Pacman import Pacman
+from Model.Ghost import Ghost
 
 class Referee(object):
 
@@ -18,6 +19,8 @@ class Referee(object):
         self.yellow = (255, 255, 0)
         self.green = (0, 255, 0)
         self.blue = (0, 0, 204)
+        self.orange = (255, 127, 0)
+        self.purple = (147, 112, 219)
 
         self.change_rate = 10
         self.fps = 15
@@ -65,6 +68,14 @@ class Referee(object):
 
         self.pacman = Pacman()
 
+        # Inicializa os fantasmas
+
+        self.red_ghost = Ghost(self.red)
+        self.blue_ghost = Ghost(self.blue)
+        self.orange_ghost = Ghost(self.orange)
+        self.purple_ghost = Ghost(self.purple)
+
+
         # Controller dos Autômatos
 
         self.aut_controller = AFDController()
@@ -111,6 +122,14 @@ class Referee(object):
 
         self.score_counter()
 
+        # Desenha os fantasmas
+
+        pygame.draw.circle(self.gameDisplay, self.blue_ghost.getColor(), (self.blue_ghost.getX(), self.blue_ghost.getY()), self.blue_ghost.getRadius())
+        pygame.draw.circle(self.gameDisplay, self.red_ghost.getColor(), (self.red_ghost.getX(), self.red_ghost.getY()), self.red_ghost.getRadius())
+        pygame.draw.circle(self.gameDisplay, self.orange_ghost.getColor(), (self.orange_ghost.getX(), self.orange_ghost.getY()), self.orange_ghost.getRadius())
+        pygame.draw.circle(self.gameDisplay, self.purple_ghost.getColor(), (self.purple_ghost.getX(), self.purple_ghost.getY()), self.purple_ghost.getRadius())
+
+
         pygame.display.update()
 
         # FPS
@@ -131,9 +150,26 @@ class Referee(object):
                 else:
                     self.trans_pac_counter = self.aut_controller.move(self.pacman.getAFD(), self.trans_pac_counter, self.pacman.getDirection())
 
-            print("Estado: " + str(self.trans_pac_counter))
+            #print("Estado: " + str(self.trans_pac_counter))
 
         # Fim do Jogo
+
+    def ghosts_automata(self, afd):
+
+        while not self.game_exit:
+
+            if self.walk:
+                if self.trans_pac_counter == 0:
+                    self.trans_pac_counter = self.aut_controller.move(self.pacman.getAFD(), 0,
+                                                                      self.pacman.getDirection())
+                else:
+                    self.trans_pac_counter = self.aut_controller.move(self.pacman.getAFD(),
+                                                                      self.trans_pac_counter,
+                                                                      self.pacman.getDirection())
+
+                    # print("Estado: " + str(self.trans_pac_counter))
+
+                    # Fim do Jogo
 
     # -------- Looping principal do jogo -------- #
 
@@ -165,8 +201,19 @@ class Referee(object):
         self.pacman.setX(boundarie_maze)
         self.pacman.setY(self.height_game - boundarie_maze)
 
-        # pacman_x = boundarie_maze
-        # pacman_y = self.height_game - boundarie_maze
+        # Posições Iniciais dos Ghosts
+
+        self.red_ghost.setX(329)
+        self.red_ghost.setY(265)
+
+        self.blue_ghost.setX(365)
+        self.blue_ghost.setY(265)
+
+        self.orange_ghost.setX(400)
+        self.orange_ghost.setY(265)
+
+        self.purple_ghost.setX(435)
+        self.purple_ghost.setY(265)
 
         # Limites até onde o pacman pode alcançar
 
@@ -363,6 +410,7 @@ class Referee(object):
                 if dist < float(self.pacman.getRadius() + self.capsule_radius):
                     self.pacman.setCapsules(self.pacman.getCapsules() + 1)
                     capsules.remove(i)
+                    break
 
             # Atualiza o Cenário
 
@@ -372,69 +420,61 @@ class Referee(object):
         pygame.quit()
         quit()
 
-    def getPacmanPosition(self, pacman):
-
-        return pacman.getPosition()
-
-    def getGhostPosition(self, ghost):
-
-        return ghost.getPosition()
-
     def calcDist(self, g_x, g_y, p_x, p_y):
 
         return math.sqrt(math.pow((g_x - p_x), 2.0) + math.pow((g_y - p_y), 2.0))
 
-    def testDirection(self, ghost, pacman):
-
-        p_x, p_y = self.getPacmanPosition(pacman)
-        g_x, g_y = self.getGhostPosition(ghost)
-        current_dist = self.calcDist(g_x, g_y, p_x, p_y)
-
-        smaller = current_dist
-        new_direction = ""
-
-        # Para a direita:
-
-        aux_x = g_x + 1.0
-        aux_y = g_y
-
-        new_dist = self.calcDist(aux_x, aux_y, p_x, p_y)
-
-        if new_dist < smaller:
-            smaller = new_dist
-            new_direction = "r"
-
-        # Para a esquerda:
-
-        aux_x = g_x - 1.0
-        aux_y = g_y
-
-        new_dist = self.calcDist(aux_x, aux_y, p_x, p_y)
-
-        if new_dist < smaller:
-            smaller = new_dist
-            new_direction = "l"
-
-        # Para baixo:
-
-        aux_x = g_x
-        aux_y = g_y - 1.0
-
-        new_dist = self.calcDist(aux_x, aux_y, p_x, p_y)
-
-        if new_dist < smaller:
-            smaller = new_dist
-            new_direction = "d"
-
-        # Para cima:
-
-        aux_x = g_x
-        aux_y = g_y + 1.0
-
-        new_dist = self.calcDist(aux_x, aux_y, p_x, p_y)
-
-        if new_dist < smaller:
-            smaller = new_dist
-            new_direction = "d"
-
-        return smaller, new_direction
+    # def testDirection(self, ghost, pacman):
+    #
+    #     p_x, p_y = self.getPacmanPosition(pacman)
+    #     g_x, g_y = self.getGhostPosition(ghost)
+    #     current_dist = self.calcDist(g_x, g_y, p_x, p_y)
+    #
+    #     smaller = current_dist
+    #     new_direction = ""
+    #
+    #     # Para a direita:
+    #
+    #     aux_x = g_x + 1.0
+    #     aux_y = g_y
+    #
+    #     new_dist = self.calcDist(aux_x, aux_y, p_x, p_y)
+    #
+    #     if new_dist < smaller:
+    #         smaller = new_dist
+    #         new_direction = "r"
+    #
+    #     # Para a esquerda:
+    #
+    #     aux_x = g_x - 1.0
+    #     aux_y = g_y
+    #
+    #     new_dist = self.calcDist(aux_x, aux_y, p_x, p_y)
+    #
+    #     if new_dist < smaller:
+    #         smaller = new_dist
+    #         new_direction = "l"
+    #
+    #     # Para baixo:
+    #
+    #     aux_x = g_x
+    #     aux_y = g_y - 1.0
+    #
+    #     new_dist = self.calcDist(aux_x, aux_y, p_x, p_y)
+    #
+    #     if new_dist < smaller:
+    #         smaller = new_dist
+    #         new_direction = "d"
+    #
+    #     # Para cima:
+    #
+    #     aux_x = g_x
+    #     aux_y = g_y + 1.0
+    #
+    #     new_dist = self.calcDist(aux_x, aux_y, p_x, p_y)
+    #
+    #     if new_dist < smaller:
+    #         smaller = new_dist
+    #         new_direction = "d"
+    #
+    #     return smaller, new_direction
