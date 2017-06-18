@@ -10,6 +10,7 @@ class Ghost(object):
         self.x = 0
         self.y = 0
         self.current_direction = "up"
+        self.current_state = "0"
 
     def build_afd(self, color):
 
@@ -63,6 +64,9 @@ class Ghost(object):
     def getDirection(self):
         return self.current_direction
 
+    def getState(self):
+        return self.current_state
+
     def setDirection(self, dir):
         self.current_direction = dir
 
@@ -71,3 +75,6 @@ class Ghost(object):
 
     def setY(self, y):
          self.y = y
+
+    def setState(self, id):
+        self.current_state = id

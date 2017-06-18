@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 import pygame, math, time
 import threading as Threads
-import pyglet
 from Controller.AFDController import AFDController
 from Model.Pacman import Pacman
 from Model.Ghost import Ghost
@@ -45,17 +44,10 @@ class Referee(object):
 
         # Inicializa os fantasmas
 
-        self.red_ghost = Ghost("red")
-        self.trans_red_counter = 0
-
-        self.blue_ghost = Ghost("blue")
-        self.trans_blue_counter = 0
-
-        self.orange_ghost = Ghost("orange")
-        self.trans_orange_counter = 0
-
+        self.red_ghost = Ghost("red") # De 5 em 5 segundos recebe a posição do pacman
+        self.blue_ghost = Ghost("blue") # Random
+        self.orange_ghost = Ghost("orange") #
         self.purple_ghost = Ghost("purple")
-        self.trans_purple_counter = 0
 
         # Todos os pontos do mapa que contém um obstáculo
 
@@ -258,21 +250,19 @@ class Referee(object):
                 self.red_ghost.setX(new_x)
                 self.red_ghost.setY(new_y)
 
-            if self.trans_red_counter == 0:
-                self.trans_red_counter = self.aut_controller.move(self.red_ghost.getAFD(), 0,
-                                                                  self.red_ghost.getDirection())
+            if self.red_ghost.getState() == "0":
+                self.red_ghost.setState(self.aut_controller.move(self.red_ghost.getAFD(), 0,
+                                                                  self.red_ghost.getDirection()))
             else:
-                self.trans_red_counter = self.aut_controller.move(self.red_ghost.getAFD(),
-                                                                  self.trans_pac_counter,
-                                                                  self.red_ghost.getDirection())
-            if self.trans_red_counter == "5":
-                music = pyglet.resource.media('music.mp3')
-                music.play()
-                pyglet.app.run()
+                self.red_ghost.setState(self.aut_controller.move(self.red_ghost.getAFD(),
+                                                                  int(self.red_ghost.getState()),
+                                                                  self.red_ghost.getDirection()))
+            if self.red_ghost.getState() == "5":
+                print("VERMELHO PEGOU!")
                 self.game_exit = True
-            # print("Estado: " + str(self.trans_red_counter))
+            #print("Estado: " + self.red_ghost.getState())
 
-                # Fim do Jogo
+        # Fim do Jogo
 
     def blue_automata(self):
 
@@ -281,17 +271,27 @@ class Referee(object):
 
         while not self.game_exit:
 
-            if self.trans_blue_counter == 0:
-                self.trans_blue_counter = self.aut_controller.move(self.pacman.getAFD(), 0,
-                                                                    self.pacman.getDirection())
+            self.clock.tick(self.fps_ghosts)
+
+            new_x, new_y, new_direction = self.move_ghosts("blue")
+
+            self.blue_ghost.setDirection(new_direction)
+            self.blue_ghost.setX(new_x)
+            self.blue_ghost.setY(new_y)
+
+            if self.blue_ghost.getState() == "0":
+                self.blue_ghost.setState(self.aut_controller.move(self.blue_ghost.getAFD(), 0,
+                                                             self.blue_ghost.getDirection()))
             else:
-                self.trans_blue_counter = self.aut_controller.move(self.pacman.getAFD(),
-                                                                    self.trans_pac_counter,
-                                                                    self.pacman.getDirection())
+                self.blue_ghost.setState(self.aut_controller.move(self.blue_ghost.getAFD(),
+                                                             int(self.blue_ghost.getState()),
+                                                             self.blue_ghost.getDirection()))
+            if self.blue_ghost.getState() == "5":
+                print("AZUL PEGOU!")
+                self.game_exit = True
+            print("Estado: " + self.red_ghost.getState())
 
-            # print("Estado: " + str(self.trans_pac_counter))
-
-                # Fim do Jogo
+    # Fim do Jogo
 
     def orange_automata(self):
 
@@ -362,16 +362,20 @@ class Referee(object):
 
         t_control_red = Threads.Thread(target=self.control_red, args=())
 
+        t_blue = Threads.Thread(target=self.blue_automata, args=())
+
 
 
         t_game.start()
         t_pacman.start()
         t_red.start()
         t_control_red.start()
+        t_blue.start()
 
     def gameLoop(self):
 
         pygame.init()
+        pygame.mixer.init()
 
         # Posições iniciais do Pac-Man
 
@@ -381,7 +385,7 @@ class Referee(object):
         # Posições Iniciais dos Ghosts
 
         self.red_ghost.setX(340)
-        self.red_ghost.setY(250)
+        self.red_ghost.setY(265)
 
         self.blue_ghost.setX(365)
         self.blue_ghost.setY(265)
@@ -611,7 +615,7 @@ class Referee(object):
         elif color == "purple":
             ghost = copy(self.purple_ghost)
 
-        if self.lock_red:
+        if self.lock_red and color == "red":
             current_dir = self.testGhostDirection()
             print("Juiz definiu a direção: " + current_dir)
         else:

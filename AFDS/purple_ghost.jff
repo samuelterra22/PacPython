@@ -23,51 +23,16 @@
 			<x>574.0</x>
 			<y>61.0</y>
 		</state>
+		<state id="5" name="PEGOU">
+			<x>1449.0</x>
+			<y>294.0</y>
+			<final/>
+		</state>
 		<!--The list of transitions.-->
 		<transition>
-			<from>4</from>
-			<to>3</to>
-			<read>down</read>
-		</transition>
-		<transition>
-			<from>0</from>
-			<to>3</to>
-			<read>down</read>
-		</transition>
-		<transition>
-			<from>1</from>
-			<to>4</to>
-			<read>up</read>
-		</transition>
-		<transition>
-			<from>2</from>
-			<to>3</to>
-			<read>down</read>
-		</transition>
-		<transition>
-			<from>1</from>
-			<to>1</to>
-			<read>right</read>
-		</transition>
-		<transition>
-			<from>1</from>
-			<to>2</to>
-			<read>left</read>
-		</transition>
-		<transition>
 			<from>3</from>
-			<to>3</to>
-			<read>down</read>
-		</transition>
-		<transition>
-			<from>0</from>
 			<to>1</to>
 			<read>right</read>
-		</transition>
-		<transition>
-			<from>4</from>
-			<to>2</to>
-			<read>left</read>
 		</transition>
 		<transition>
 			<from>2</from>
@@ -80,6 +45,71 @@
 			<read>right</read>
 		</transition>
 		<transition>
+			<from>1</from>
+			<to>3</to>
+			<read>down</read>
+		</transition>
+		<transition>
+			<from>0</from>
+			<to>1</to>
+			<read>right</read>
+		</transition>
+		<transition>
+			<from>4</from>
+			<to>3</to>
+			<read>down</read>
+		</transition>
+		<transition>
+			<from>2</from>
+			<to>3</to>
+			<read>down</read>
+		</transition>
+		<transition>
+			<from>0</from>
+			<to>3</to>
+			<read>down</read>
+		</transition>
+		<transition>
+			<from>1</from>
+			<to>1</to>
+			<read>right</read>
+		</transition>
+		<transition>
+			<from>3</from>
+			<to>3</to>
+			<read>down</read>
+		</transition>
+		<transition>
+			<from>3</from>
+			<to>2</to>
+			<read>left</read>
+		</transition>
+		<transition>
+			<from>3</from>
+			<to>5</to>
+			<read>pac</read>
+		</transition>
+		<transition>
+			<from>4</from>
+			<to>5</to>
+			<read>pac</read>
+		</transition>
+		<transition>
+			<from>2</from>
+			<to>5</to>
+			<read>pac</read>
+		</transition>
+		<transition>
+			<from>1</from>
+			<to>4</to>
+			<read>up</read>
+		</transition>
+		<transition>
+			<from>4</from>
+			<to>2</to>
+			<read>left</read>
+		</transition>
+		<transition>
 			<from>2</from>
 			<to>2</to>
 			<read>left</read>
@@ -90,14 +120,19 @@
 			<read>left</read>
 		</transition>
 		<transition>
-			<from>3</from>
+			<from>0</from>
 			<to>4</to>
 			<read>up</read>
 		</transition>
 		<transition>
-			<from>3</from>
-			<to>1</to>
-			<read>right</read>
+			<from>1</from>
+			<to>5</to>
+			<read>pac</read>
+		</transition>
+		<transition>
+			<from>1</from>
+			<to>2</to>
+			<read>left</read>
 		</transition>
 		<transition>
 			<from>4</from>
@@ -110,17 +145,7 @@
 			<read>up</read>
 		</transition>
 		<transition>
-			<from>1</from>
-			<to>3</to>
-			<read>down</read>
-		</transition>
-		<transition>
 			<from>3</from>
-			<to>2</to>
-			<read>left</read>
-		</transition>
-		<transition>
-			<from>0</from>
 			<to>4</to>
 			<read>up</read>
 		</transition>
