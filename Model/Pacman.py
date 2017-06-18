@@ -50,5 +50,9 @@ class Pacman(object):
     def setY(self, y):
          self.y = y
 
+    def setInitialPosition(self, x, y):
+        self.x = x
+        self.y = y
+
 
 

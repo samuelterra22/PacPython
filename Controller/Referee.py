@@ -38,16 +38,27 @@ class Referee(object):
                     (294, 114, 400, 114), (474, 136, 474, 66),
                     (541, 163, 700, 163), (620, 166, 620, 266), (750, 112, 780, 112), (750, 335, 750, 200)]
 
+        # Cápsulas
+
+        self.capsules = []
+
+        # Imagens dos fantasmas
+
+        self.blue_img = None
+        self.red_img = None
+        self.orange_img = None
+        self.purple_img = None
+
         # Inicializa um Pacman!!
 
         self.pacman = Pacman()
 
         # Inicializa os fantasmas
 
-        self.red_ghost = Ghost("red") # De 5 em 5 segundos recebe a posição do pacman
+        self.red_ghost = Ghost("red") # De 5 em 5 segundos recebe a posição do pacman (absoluta)
         self.blue_ghost = Ghost("blue") # Random
         self.orange_ghost = Ghost("orange") # Sempre que o pacman muda de direção ele copia a direção contrária!
-        self.purple_ghost = Ghost("purple")
+        self.purple_ghost = Ghost("purple") # Vai na direção do pacman
 
         # Direções disponíveis:
 
@@ -62,8 +73,8 @@ class Referee(object):
         # FPS e blocos que os elementos móveis se movimentam por vez.
 
         self.change_rate = 10
-        self.fps = 15
-        self.fps_ghosts = 10
+        self.fps = 25
+        self.fps_ghosts = 15
 
         # Dimensões de Tela
 
@@ -129,28 +140,28 @@ class Referee(object):
         self.aut_controller = AFDController()
 
 
+    # ------- * Construtor da lista de barreiras do labirinto ------- * #
+
+
     def build_barrier_points(self):
 
         for i in self.barriers:
-            # Barreira Horizontal
+            # Barreiras Horizontais
 
             if i[1] == i[3]:
                 if i[0] > i[2]:
                     for x in range(i[2], i[0] + 1):
                         self.barrier_points.append((x, i[1]))
-
                 else:
                     for x in range(i[0], i[2] + 1):
                         self.barrier_points.append((x, i[1]))
 
-
-            # Barreira Vertical
+            # Barreiras Verticais
 
             if i[0] == i[2]:
                 if i[1] > i[3]:
                     for y in range(i[3], i[1] + 1):
                         self.barrier_points.append((i[0], y))
-
                 else:
                     for y in range(i[1], i[3] + 1):
                         self.barrier_points.append((i[0], y))
@@ -165,6 +176,66 @@ class Referee(object):
 
         for i in range(1981, 3962):
             self.barrier_points2.append(self.barrier_points[i])
+
+    # ------- * Construtor da lista de cápsulas do labirinto ------- * #
+
+    def build_capsules(self):
+
+        dist_capsules = 20
+
+        for i in range(0, 17):
+            self.capsules.append(((self.pacman.getX() + dist_capsules), self.boundarie_y_pacman))
+            dist_capsules += 40
+
+        dist_capsules = 0
+
+        for i in range(0, 20):
+            self.capsules.append(((46 + dist_capsules), 26))
+            dist_capsules += 40
+
+        dist_capsules = 0
+
+        for i in range(0, 11):
+            self.capsules.append((25, (452 - dist_capsules)))
+            self.capsules.append((85, (25 + dist_capsules)))
+            self.capsules.append((778, (158 + dist_capsules)))
+            dist_capsules += 40
+
+        dist_capsules = 0
+
+        for i in range(0, 15):
+            self.capsules.append(((132 + dist_capsules), 324))
+            dist_capsules += 40
+
+        dist_capsules = 0
+
+        for i in range(0, 8):
+            self.capsules.append(((456 + dist_capsules), 388))
+            self.capsules.append(((125 + dist_capsules), 85))
+            self.capsules.append(((125 + dist_capsules), 145))
+
+            dist_capsules += 40
+
+        dist_capsules = 0
+
+        for i in range(0, 7):
+            self.capsules.append(((376 - dist_capsules), 385))
+            self.capsules.append(((298 + dist_capsules), 473))
+            self.capsules.append(((565 + dist_capsules), 91))
+            self.capsules.append((724, (122 + dist_capsules)))
+            dist_capsules += 40
+
+        dist_capsules = 0
+
+        for i in range(0, 3):
+            self.capsules.append((526, (49 + dist_capsules)))
+            self.capsules.append((526, (170 + dist_capsules)))
+            self.capsules.append((335, (433 + dist_capsules)))
+            self.capsules.append((173, (424 + dist_capsules)))
+            self.capsules.append(((176 + dist_capsules), 255))
+            self.capsules.append((696, (429 + dist_capsules)))
+            self.capsules.append(((12 + dist_capsules), 509))
+            dist_capsules += 40
 
     # -------- Contador do Placar -------- #
 
@@ -210,10 +281,14 @@ class Referee(object):
 
         # Desenha os fantasmas
 
-        pygame.draw.circle(self.gameDisplay, self.blue_ghost.getColor(), (self.blue_ghost.getX(), self.blue_ghost.getY()), self.blue_ghost.getRadius())
-        pygame.draw.circle(self.gameDisplay, self.red_ghost.getColor(), (self.red_ghost.getX(), self.red_ghost.getY()), self.red_ghost.getRadius())
-        pygame.draw.circle(self.gameDisplay, self.orange_ghost.getColor(), (self.orange_ghost.getX(), self.orange_ghost.getY()), self.orange_ghost.getRadius())
-        pygame.draw.circle(self.gameDisplay, self.purple_ghost.getColor(), (self.purple_ghost.getX(), self.purple_ghost.getY()), self.purple_ghost.getRadius())
+        #pygame.draw.circle(self.gameDisplay, self.blue_ghost.getColor(), (self.blue_ghost.getX(), self.blue_ghost.getY()), self.blue_ghost.getRadius())
+        self.gameDisplay.blit(self.blue_img, (self.blue_ghost.getX(), self.blue_ghost.getY()))
+        self.gameDisplay.blit(self.red_img, (self.red_ghost.getX(), self.red_ghost.getY()))
+        self.gameDisplay.blit(self.orange_img, (self.orange_ghost.getX(), self.orange_ghost.getY()))
+        self.gameDisplay.blit(self.purple_img, (self.purple_ghost.getX(), self.purple_ghost.getY()))
+        # pygame.draw.circle(self.gameDisplay, self.red_ghost.getColor(), (self.red_ghost.getX(), self.red_ghost.getY()), self.red_ghost.getRadius())
+        # pygame.draw.circle(self.gameDisplay, self.orange_ghost.getColor(), (self.orange_ghost.getX(), self.orange_ghost.getY()), self.orange_ghost.getRadius())
+        # pygame.draw.circle(self.gameDisplay, self.purple_ghost.getColor(), (self.purple_ghost.getX(), self.purple_ghost.getY()), self.purple_ghost.getRadius())
 
 
         pygame.display.update()
@@ -364,7 +439,7 @@ class Referee(object):
         while not self.game_exit:
             self.lock_red = False
 
-            time.sleep(8)
+            time.sleep(5)
 
             self.lock_red = True
             new_x, new_y, new_direction = self.move_ghosts("red")
@@ -398,9 +473,6 @@ class Referee(object):
 
         t_purple = Threads.Thread(target=self.purple_automata, args=())
 
-
-
-
         t_game.start()
         t_pacman.start()
         t_red.start()
@@ -414,26 +486,28 @@ class Referee(object):
         pygame.init()
         pygame.mixer.init()
 
+        blue_img = pygame.image.load("Images/blue.png")
+        red_img = pygame.image.load("Images/red.png")
+        purple_img = pygame.image.load("Images/purple.png")
+        orange_img = pygame.image.load("Images/orange.png")
+
+        self.blue_img = blue_img
+        self.orange_img = orange_img
+        self.red_img = red_img
+        self.purple_img = purple_img
+
         # Posições iniciais do Pac-Man
 
-        self.pacman.setX(self.boundarie_maze)
-        self.pacman.setY(self.height_game - self.boundarie_maze)
+        self.pacman.setInitialPosition(self.boundarie_maze, self.height_game - self.boundarie_maze)
 
-        # Posições Iniciais dos Ghosts
+        # Seta as posições iniciais dos ghosts
 
-        self.red_ghost.setX(340)
-        self.red_ghost.setY(265)
+        self.red_ghost.setInitialPosition("red")
+        self.blue_ghost.setInitialPosition("blue")
+        self.orange_ghost.setInitialPosition("orange")
+        self.purple_ghost.setInitialPosition("purple")
 
-        self.blue_ghost.setX(365)
-        self.blue_ghost.setY(265)
-
-        self.orange_ghost.setX(400)
-        self.orange_ghost.setY(265)
-
-        self.purple_ghost.setX(435)
-        self.purple_ghost.setY(265)
-
-        # Variáveis para a mudança de posição do pacman e dos Ghosts
+        # Variáveis para a mudança de posição do pacman
 
         pacman_x_change = 0
         pacman_y_change = 0
@@ -442,68 +516,13 @@ class Referee(object):
         aux_x = -1
         aux_y = -1
 
-        #Inicializa as Capsulas
-
-        capsules = []
-        dist_capsules = 20
-
-        for i in range(0,17):
-            capsules.append(((self.pacman.getX() + dist_capsules), self.boundarie_y_pacman))
-            dist_capsules+= 40
-
-        dist_capsules = 0
-
-        for i in range(0,20):
-            capsules.append(((46 + dist_capsules) , 26))
-            dist_capsules += 40
-
-        dist_capsules = 0
-
-        for i in range(0,11):
-            capsules.append((25,(452 - dist_capsules)))
-            capsules.append((85, (25 + dist_capsules)))
-            capsules.append((778, (158 + dist_capsules)))
-            dist_capsules += 40
-
-        dist_capsules = 0
-
-        for i in range(0,15):
-            capsules.append(((132 + dist_capsules),324))
-            dist_capsules += 40
-
-        dist_capsules = 0
-
-        for i in range(0,8):
-            capsules.append(((456 + dist_capsules), 388))
-            capsules.append(((125 + dist_capsules), 85))
-            capsules.append(((125 + dist_capsules), 145))
-
-            dist_capsules += 40
-
-        dist_capsules = 0
-
-        for i in range(0,7):
-            capsules.append(((376 - dist_capsules), 385))
-            capsules.append(((298 + dist_capsules), 473))
-            capsules.append(((565 + dist_capsules), 91))
-            capsules.append((724, (122 + dist_capsules)))
-            dist_capsules += 40
-
-        dist_capsules = 0
-
-        for i in range(0,3):
-            capsules.append((526, (49 + dist_capsules)))
-            capsules.append((526, (170 + dist_capsules)))
-            capsules.append((335, (433 + dist_capsules)))
-            capsules.append((173, (424 + dist_capsules)))
-            capsules.append(((176 + dist_capsules), 255))
-            capsules.append((696, (429 + dist_capsules)))
-            capsules.append(((12 + dist_capsules), 509))
-            dist_capsules += 40
-
         # Monta a lista de pontos contendo todos os os obstatculos do game.
 
         self.build_barrier_points()
+
+        # Monta a lista de cápsulas presentes no game
+
+        self.build_capsules()
 
     # Loop do jogo
 
@@ -612,17 +631,16 @@ class Referee(object):
 
             # Verifica o ingerir de capsulas
 
-            for i in capsules:
+            for i in self.capsules:
                 dist = self.calcDist(self.pacman.getX(), self.pacman.getY(), i[0], i[1])
                 if dist < float(self.pacman.getRadius() + self.capsule_radius):
                     self.pacman.setCapsules(self.pacman.getCapsules() + 1)
-                    capsules.remove(i)
+                    self.capsules.remove(i)
                     break
-
 
             # Atualiza o Cenário
 
-            self.draw_game(capsules, self.barriers)
+            self.draw_game(self.capsules, self.barriers)
 
         # End While
         pygame.quit()
@@ -647,7 +665,7 @@ class Referee(object):
             ghost = copy(self.purple_ghost)
 
         if self.lock_red and color == "red":
-            current_dir = self.testGhostDirection()
+            current_dir = self.testGhostDirection("red")
            # print("Juiz definiu a direção: " + current_dir)
 
         elif self.lock_orange and color == "orange":
@@ -766,10 +784,13 @@ class Referee(object):
                 return True
         return False
 
-    def testGhostDirection(self):
+    def testGhostDirection(self, color):
 
-        ghost_x = self.red_ghost.getX()
-        ghost_y = self.red_ghost.getY()
+        if color == "red":
+            ghost = copy(self.red_ghost)
+
+        ghost_x = ghost.getX()
+        ghost_y = ghost.getY()
 
         pac_x = self.pacman.getX()
         pac_y = self.pacman.getY()

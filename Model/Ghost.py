@@ -78,3 +78,21 @@ class Ghost(object):
 
     def setState(self, id):
         self.current_state = id
+
+    def setInitialPosition(self, color):
+
+        if color == "red":
+            self.x = 340
+            self.y = 265
+
+        elif color == "orange":
+            self.x = 400
+            self.y = 265
+
+        elif color == "blue":
+            self.x = 365
+            self.y = 265
+
+        elif color == "purple":
+            self.x = 435
+            self.y = 265
