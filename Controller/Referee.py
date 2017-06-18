@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import pygame, math, time
 import threading as Threads
+import pyglet
 from Controller.AFDController import AFDController
 from Model.Pacman import Pacman
 from Model.Ghost import Ghost
@@ -265,7 +266,9 @@ class Referee(object):
                                                                   self.trans_pac_counter,
                                                                   self.red_ghost.getDirection())
             if self.trans_red_counter == "5":
-                print("Game Over")
+                music = pyglet.resource.media('music.mp3')
+                music.play()
+                pyglet.app.run()
                 self.game_exit = True
             # print("Estado: " + str(self.trans_red_counter))
 
