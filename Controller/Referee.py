@@ -46,8 +46,12 @@ class Referee(object):
 
         self.red_ghost = Ghost("red") # De 5 em 5 segundos recebe a posição do pacman
         self.blue_ghost = Ghost("blue") # Random
-        self.orange_ghost = Ghost("orange") #
+        self.orange_ghost = Ghost("orange") # Sempre que o pacman muda de direção ele copia a direção contrária!
         self.purple_ghost = Ghost("purple")
+
+        # Direções disponíveis:
+
+        self.directions_available = ["up", "down", "left", "right"]
 
         # Todos os pontos do mapa que contém um obstáculo
 
@@ -116,6 +120,10 @@ class Referee(object):
 
         self.lock_red = False
 
+        self.lock_orange = False
+
+        self.orange_next_dir = "up"
+
         # Controller dos Autômatos
 
         self.aut_controller = AFDController()
@@ -136,7 +144,7 @@ class Referee(object):
                         self.barrier_points.append((x, i[1]))
 
 
-                        # Barreira Vertical
+            # Barreira Vertical
 
             if i[0] == i[2]:
                 if i[1] > i[3]:
@@ -289,7 +297,7 @@ class Referee(object):
             if self.blue_ghost.getState() == "5":
                 print("AZUL PEGOU!")
                 self.game_exit = True
-            print("Estado: " + self.red_ghost.getState())
+            #print("Estado: " + self.red_ghost.getState())
 
     # Fim do Jogo
 
@@ -300,16 +308,26 @@ class Referee(object):
 
         while not self.game_exit:
 
-            if self.trans_orange_counter == 0:
-                self.trans_orange_counter = self.aut_controller.move(self.pacman.getAFD(), 0,
-                                                                    self.pacman.getDirection())
+            self.clock.tick(self.fps_ghosts)
+
+            new_x, new_y, new_direction = self.move_ghosts("orange")
+
+            self.orange_ghost.setDirection(new_direction)
+            self.orange_ghost.setX(new_x)
+            self.orange_ghost.setY(new_y)
+            self.lock_orange = False
+
+            if self.orange_ghost.getState() == "0":
+                self.orange_ghost.setState(self.aut_controller.move(self.orange_ghost.getAFD(), 0,
+                                                                  self.orange_ghost.getDirection()))
             else:
-                self.trans_orange_counter = self.aut_controller.move(self.pacman.getAFD(),
-                                                                    self.trans_pac_counter,
-                                                                    self.pacman.getDirection())
-
-            # print("Estado: " + str(self.trans_pac_counter))
-
+                self.orange_ghost.setState(self.aut_controller.move(self.orange_ghost.getAFD(),
+                                                                  int(self.orange_ghost.getState()),
+                                                                  self.orange_ghost.getDirection()))
+            if self.orange_ghost.getState() == "5":
+                print("LARANJA PEGOU!")
+                self.game_exit = True
+            #print("Estado: " + self.red_ghost.getState())
                 # Fim do Jogo
 
     def purple_automata(self):
@@ -319,16 +337,28 @@ class Referee(object):
 
         while not self.game_exit:
 
-            if self.trans_purple_counter == 0:
-                self.trans_purple_counter = self.aut_controller.move(self.pacman.getAFD(), 0,
-                                                                    self.pacman.getDirection())
+            self.clock.tick(self.fps_ghosts)
+
+            new_x, new_y, new_direction = self.move_ghosts("purple")
+
+            self.purple_ghost.setDirection(new_direction)
+            self.purple_ghost.setX(new_x)
+            self.purple_ghost.setY(new_y)
+
+            if self.purple_ghost.getState() == "0":
+                self.purple_ghost.setState(self.aut_controller.move(self.purple_ghost.getAFD(), 0,
+                                                                  self.purple_ghost.getDirection()))
             else:
-                self.trans_purple_counter = self.aut_controller.move(self.pacman.getAFD(),
-                                                                    self.trans_pac_counter,
-                                                                    self.pacman.getDirection())
-            # print("Estado: " + str(self.trans_pac_counter))
+                self.purple_ghost.setState(self.aut_controller.move(self.purple_ghost.getAFD(),
+                                                                  int(self.purple_ghost.getState()),
+                                                                  self.purple_ghost.getDirection()))
+            if self.purple_ghost.getState() == "5":
+                print("AZUL PEGOU!")
+                self.game_exit = True
+                # print("Estado: " + self.red_ghost.getState())
 
                 # Fim do Jogo
+
     def control_red(self):
 
         while not self.game_exit:
@@ -364,6 +394,11 @@ class Referee(object):
 
         t_blue = Threads.Thread(target=self.blue_automata, args=())
 
+        t_orange = Threads.Thread(target=self.orange_automata, args=())
+
+        t_purple = Threads.Thread(target=self.purple_automata, args=())
+
+
 
 
         t_game.start()
@@ -371,6 +406,8 @@ class Referee(object):
         t_red.start()
         t_control_red.start()
         t_blue.start()
+        t_orange.start()
+        # t_purple.start()
 
     def gameLoop(self):
 
@@ -468,20 +505,6 @@ class Referee(object):
 
         self.build_barrier_points()
 
-
-        # barriers = [(100, 50, 500, 50), (60, 550, 300, 550), (360, 510, 460, 510), (410, 510, 410, 550),
-        #             (510, 520, 660, 520), (730, 580, 730, 450),
-        #             (5, 480, 70, 480), (135, 540, 135, 440), (200, 420, 300, 420), (200, 480, 250, 480),
-        #             (360, 350, 460, 350), (410, 350, 410, 450),
-        #             (505, 410, 595, 410), (650, 520, 650, 460), (580, 520, 580, 470), (670, 345, 670, 245),
-        #             (555, 285, 690, 285), (300, 280, 300, 200),
-        #             (290, 280, 470, 280), (470, 290, 470, 200), (145, 205, 145, 305), (205, 205, 250, 205),
-        #             (525, 285, 555, 285), (125, 360, 295, 360),
-        #             (50, 415, 50, 135), (140, 110, 240, 110), (145, 170, 200, 170), (560, 50, 780, 50),
-        #             (295, 115, 400, 115), (475, 135, 475, 65),
-        #             (540, 165, 700, 165), (620, 165, 620, 265), (750, 110, 780, 110), (750, 335, 750, 200)]
-
-
     # Loop do jogo
 
         while not self.game_exit:
@@ -498,6 +521,8 @@ class Referee(object):
                     if event.key == pygame.K_LEFT:
                         pacman_x_change = -self.change_rate
                         pacman_y_change = 0
+                        self.orange_next_dir = "right"
+                        self.lock_orange = True
                         self.pacman.setDirection("left")
                         # Testa se está tentando atravessar a parede.
                         if aux_x > -1:
@@ -508,6 +533,8 @@ class Referee(object):
                     elif event.key == pygame.K_RIGHT:
                         pacman_x_change = self.change_rate
                         pacman_y_change = 0
+                        self.orange_next_dir = "left"
+                        self.lock_orange = True
                         self.pacman.setDirection("right")
                         # Testa se está tentando atravessar a parede.
                         if aux_x > -1:
@@ -519,6 +546,8 @@ class Referee(object):
                         pacman_y_change = -self.change_rate
                         pacman_x_change = 0
                         self.pacman.setDirection("up")
+                        self.lock_orange = True
+                        self.orange_next_dir = "down"
                         # Testa se está tentando atravessar a parede.
                         if aux_x > -1:
                             test_dist = self.calcDist(self.pacman.getX(), self.pacman.getY() + pacman_y_change, aux_x, aux_y)
@@ -529,6 +558,8 @@ class Referee(object):
                         pacman_y_change = self.change_rate
                         pacman_x_change = 0
                         self.pacman.setDirection("down")
+                        self.lock_orange = True
+                        self.orange_next_dir = "up"
                         # Testa se está tentando atravessar a parede.
                         if aux_x > -1:
                             test_dist = self.calcDist(self.pacman.getX(), self.pacman.getY() + pacman_y_change, aux_x, aux_y)
@@ -617,12 +648,14 @@ class Referee(object):
 
         if self.lock_red and color == "red":
             current_dir = self.testGhostDirection()
-            print("Juiz definiu a direção: " + current_dir)
+           # print("Juiz definiu a direção: " + current_dir)
+
+        elif self.lock_orange and color == "orange":
+            current_dir = self.orange_next_dir
+
         else:
             current_dir = ghost.getDirection()
 
-
-        directions_available = ["up", "down", "left", "right"]
         ghost_x_change = 0
         ghost_y_change = 0
 
@@ -655,39 +688,45 @@ class Referee(object):
 
             if ghost.getX() > self.boundarie_x_pacman:
                 ghost.setX(ghost.getX() - ghost_x_change)
-                aux = directions_available[:]
+                aux = self.directions_available[:]
                 aux.remove(current_dir)
                 new_direction = choice(aux)
                 border_collision = True
-                if self.lock_red:
-                    print("Direção do Juiz Falhou. Nova direção: " + new_direction)
+
+
+                # if self.lock_red:
+                #     #print("Direção do Juiz Falhou. Nova direção: " + new_direction)
 
             elif ghost.getX() < self.boundarie_maze:
                 ghost.setX(self.boundarie_maze)
-                aux = directions_available[:]
+                aux = self.directions_available[:]
                 aux.remove(current_dir)
                 new_direction = choice(aux)
                 border_collision = True
-                if self.lock_red:
-                    print("Direção do Juiz Falhou. Nova direção: " + new_direction)
+
+
+                # if self.lock_red:
+                #     #print("Direção do Juiz Falhou. Nova direção: " + new_direction)
 
             if ghost.getY() > self.boundarie_y_pacman:
                 ghost.setY(ghost.getY() - ghost_y_change)
-                aux = directions_available[:]
+                aux = self.directions_available[:]
                 aux.remove(current_dir)
                 new_direction = choice(aux)
                 border_collision = True
-                if self.lock_red:
-                    print("Direção do Juiz Falhou. Nova direção: " + new_direction)
+
+                # if self.lock_red:
+                #     #print("Direção do Juiz Falhou. Nova direção: " + new_direction)
 
             elif ghost.getY() < self.boundarie_maze:
                 ghost.setY(self.boundarie_maze)
-                aux = directions_available[:]
+                aux = self.directions_available[:]
                 aux.remove(current_dir)
                 new_direction = choice(aux)
                 border_collision = True
-                if self.lock_red:
-                    print("Direção do Juiz Falhou. Nova direção: " + new_direction)
+
+                # if self.lock_red:
+                #     print("Direção do Juiz Falhou. Nova direção: " + new_direction)
 
             if not border_collision:
 
@@ -696,14 +735,16 @@ class Referee(object):
                 if self.ghost_barrier_colision(ghost):
                     ghost.setX(ghost.getX() - ghost_x_change)
                     ghost.setY(ghost.getY() - ghost_y_change)
-                    aux = directions_available[:]
+                    aux = self.directions_available[:]
                     aux.remove(current_dir)
                     new_direction = choice(aux)
-                    if self.lock_red:
-                        print("Direção do Juiz Falhou. Nova direção: " + new_direction)
+
+                    # if self.lock_red:
+                    #     #print("Direção do Juiz Falhou. Nova direção: " + new_direction)
 
                 else:
                     new_direction = current_dir
+
 
         return ghost.getX(), ghost.getY(), new_direction
 
