@@ -15,7 +15,7 @@ class Pacman(object):
 
     def build_afd(self):
         pac_controller = AFDController()
-        return pac_controller.load("AFDS/automata.jff")
+        return pac_controller.load("AFDS/pacman.jff")
 
     def getRadius(self):
         return self.radius
