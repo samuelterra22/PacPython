@@ -6,6 +6,7 @@ from Model.Pacman import Pacman
 from Model.Ghost import Ghost
 from random import choice
 from copy import copy
+from Model.Fruits import Fruits
 
 class Referee(object):
 
@@ -42,6 +43,20 @@ class Referee(object):
 
         self.capsules = []
 
+        self.capsules1 = []
+        self.capsules2 = []
+
+        # Powerfull Fruits!!
+
+        self.fruits = []
+
+        self.banana = None
+        self.cherry = None
+
+        # Vidas
+
+        self.lifes = []
+
         # Imagens dos fantasmas
 
         self.blue_img = None
@@ -73,8 +88,8 @@ class Referee(object):
         # FPS e blocos que os elementos móveis se movimentam por vez.
 
         self.change_rate = 10
-        self.fps = 25
-        self.fps_ghosts = 15
+        self.fps = 30
+        self.fps_ghosts = 10
 
         # Dimensões de Tela
 
@@ -130,8 +145,9 @@ class Referee(object):
         self.go_ghosts = False
 
         self.lock_red = False
-
         self.lock_orange = False
+        self.lock_purple = False
+        self.fruit_power = False
 
         self.orange_next_dir = "up"
 
@@ -139,9 +155,7 @@ class Referee(object):
 
         self.aut_controller = AFDController()
 
-
     # ------- * Construtor da lista de barreiras do labirinto ------- * #
-
 
     def build_barrier_points(self):
 
@@ -171,10 +185,10 @@ class Referee(object):
 
         # Divide a lista ao meio para acelerar o processamento
 
-        for i in range(0, 1981):
+        for i in range(0, len(self.barrier_points) / 2):
             self.barrier_points1.append(self.barrier_points[i])
 
-        for i in range(1981, 3962):
+        for i in range(len(self.barrier_points) / 2, len(self.barrier_points)):
             self.barrier_points2.append(self.barrier_points[i])
 
     # ------- * Construtor da lista de cápsulas do labirinto ------- * #
@@ -237,6 +251,16 @@ class Referee(object):
             self.capsules.append(((12 + dist_capsules), 509))
             dist_capsules += 40
 
+        # # Divide a lista de cápsulas em 2, para agilizar o procesamento.
+        #
+        # self.capsules.sort(key=lambda tup: tup[0])
+        #
+        # for i in range(0, len(self.capsules) / 2):
+        #     self.capsules1.append(self.capsules[i])
+        #
+        # for i in range(len(self.capsules) / 2, len(self.capsules)):
+        #     self.capsules2.append(self.capsules[i])
+
     # -------- Contador do Placar -------- #
 
     def score_counter(self):
@@ -244,7 +268,18 @@ class Referee(object):
         font = pygame.font.SysFont(None, 25)
         score = "Score: " + str(self.pacman.getCapsules())
         screen_text = font.render(score, True, self.green)
-        self.gameDisplay.blit(screen_text, [5, 650])
+        self.gameDisplay.blit(screen_text, [5, 680])
+
+    def life_counter(self):
+
+        font = pygame.font.SysFont(None, 25)
+        score = "Lifes: "
+        x = 67
+        for i in self.lifes:
+            self.gameDisplay.blit(i, (x, 625))
+            x+= 20
+        screen_text = font.render(score, True, self.yellow)
+        self.gameDisplay.blit(screen_text, [7, 627])
 
     # -------- Desenha o jogo, atualizando as posições -------- #
 
@@ -279,6 +314,10 @@ class Referee(object):
 
         self.score_counter()
 
+        # Desenha o contador de vidas
+
+        self.life_counter()
+
         # Desenha os fantasmas
 
         #pygame.draw.circle(self.gameDisplay, self.blue_ghost.getColor(), (self.blue_ghost.getX(), self.blue_ghost.getY()), self.blue_ghost.getRadius())
@@ -290,6 +329,10 @@ class Referee(object):
         # pygame.draw.circle(self.gameDisplay, self.orange_ghost.getColor(), (self.orange_ghost.getX(), self.orange_ghost.getY()), self.orange_ghost.getRadius())
         # pygame.draw.circle(self.gameDisplay, self.purple_ghost.getColor(), (self.purple_ghost.getX(), self.purple_ghost.getY()), self.purple_ghost.getRadius())
 
+        # Desenha as frutas
+
+        for i in self.fruits:
+            self.gameDisplay.blit(i.getImg(), (i.getX(), i.getY()))
 
         pygame.display.update()
 
@@ -414,11 +457,13 @@ class Referee(object):
 
             self.clock.tick(self.fps_ghosts)
 
-            new_x, new_y, new_direction = self.move_ghosts("purple")
+            if not self.lock_purple:
 
-            self.purple_ghost.setDirection(new_direction)
-            self.purple_ghost.setX(new_x)
-            self.purple_ghost.setY(new_y)
+                new_x, new_y, new_direction = self.move_ghosts("purple")
+
+                self.purple_ghost.setDirection(new_direction)
+                self.purple_ghost.setX(new_x)
+                self.purple_ghost.setY(new_y)
 
             if self.purple_ghost.getState() == "0":
                 self.purple_ghost.setState(self.aut_controller.move(self.purple_ghost.getAFD(), 0,
@@ -428,11 +473,11 @@ class Referee(object):
                                                                   int(self.purple_ghost.getState()),
                                                                   self.purple_ghost.getDirection()))
             if self.purple_ghost.getState() == "5":
-                print("AZUL PEGOU!")
+                print("LILÁS PEGOU!")
                 self.game_exit = True
-                # print("Estado: " + self.red_ghost.getState())
+            #print("Estado: " + self.purple_ghost.getState())
 
-                # Fim do Jogo
+        # Fim do Jogo
 
     def control_red(self):
 
@@ -446,6 +491,19 @@ class Referee(object):
             self.red_ghost.setDirection(new_direction)
             self.red_ghost.setX(new_x)
             self.red_ghost.setY(new_y)
+
+    def control_purple(self):
+
+        while not self.game_exit:
+            self.lock_purple = False
+
+            time.sleep(2)
+
+            self.lock_purple = True
+            new_x, new_y, new_direction = self.move_ghosts("purple")
+            self.purple_ghost.setDirection(new_direction)
+            self.purple_ghost.setX(new_x)
+            self.purple_ghost.setY(new_y)
 
     # -------- Looping principal do jogo -------- #
 
@@ -465,21 +523,24 @@ class Referee(object):
 
         t_red = Threads.Thread(target=self.red_automata, args=())
 
-        t_control_red = Threads.Thread(target=self.control_red, args=())
-
         t_blue = Threads.Thread(target=self.blue_automata, args=())
 
         t_orange = Threads.Thread(target=self.orange_automata, args=())
 
         t_purple = Threads.Thread(target=self.purple_automata, args=())
 
+        t_control_red = Threads.Thread(target=self.control_red, args=())
+
+        t_control_purple = Threads.Thread(target=self.control_purple, args=())
+
         t_game.start()
         t_pacman.start()
         t_red.start()
-        t_control_red.start()
         t_blue.start()
         t_orange.start()
-        # t_purple.start()
+        t_purple.start()
+        t_control_red.start()
+        t_control_purple.start()
 
     def gameLoop(self):
 
@@ -490,6 +551,24 @@ class Referee(object):
         red_img = pygame.image.load("Images/red.png")
         purple_img = pygame.image.load("Images/purple.png")
         orange_img = pygame.image.load("Images/orange.png")
+
+        banana_img = pygame.image.load("Images/fruit1.png")
+        cherry_img = pygame.image.load("Images/fruit2.png")
+
+        life = pygame.image.load("Images/pacman.png")
+
+        self.lifes.append(life)
+        self.lifes.append(life)
+        self.lifes.append(life)
+
+        banana = Fruits(640, 195, banana_img)
+        cherry = Fruits(170, 190, cherry_img)
+
+        self.fruits.append(banana)
+        self.fruits.append(cherry)
+
+        self.banana = banana
+        self.cherry = cherry
 
         self.blue_img = blue_img
         self.orange_img = orange_img
@@ -532,7 +611,6 @@ class Referee(object):
                 print('GANHOU!')
                 self.game_exit = True
             for event in pygame.event.get():
-
                 if event.type == pygame.QUIT:
                     self.game_exit = True
                 elif event.type == pygame.KEYDOWN:
@@ -612,7 +690,7 @@ class Referee(object):
 
             # Verifica a coolisão com barreiras.
 
-            if self.pacman.getX() > self.barrier_points1[1980][0]:
+            if self.pacman.getX() > self.barrier_points1[len(self.barrier_points)/2 - 1][0]:
                 b_points = self.barrier_points2
             else: b_points = self.barrier_points1
 
@@ -635,7 +713,20 @@ class Referee(object):
                 dist = self.calcDist(self.pacman.getX(), self.pacman.getY(), i[0], i[1])
                 if dist < float(self.pacman.getRadius() + self.capsule_radius):
                     self.pacman.setCapsules(self.pacman.getCapsules() + 1)
+                    #pygame.mixer.music.load(open("Sounds/eat_capsules.wav", "rb"))
+                    #pygame.mixer.music.play()
+                    #while pygame.mixer.music.get_busy():
+                    #     time.sleep(0.5)
                     self.capsules.remove(i)
+                    break
+
+            # Verifica o ingerir das frutas
+
+            for i in self.fruits:
+                dist = self.calcDist(self.pacman.getX(), self.pacman.getY(), i.getX(), i.getY())
+                if dist < 19.0:
+                    self.fruits.remove(i)
+                    self.fruit_power = True
                     break
 
             # Atualiza o Cenário
@@ -670,6 +761,9 @@ class Referee(object):
 
         elif self.lock_orange and color == "orange":
             current_dir = self.orange_next_dir
+
+        elif self.lock_purple and color == "purple":
+            current_dir = self.testGhostDirection("purple")
 
         else:
             current_dir = ghost.getDirection()
@@ -722,7 +816,6 @@ class Referee(object):
                 new_direction = choice(aux)
                 border_collision = True
 
-
                 # if self.lock_red:
                 #     #print("Direção do Juiz Falhou. Nova direção: " + new_direction)
 
@@ -761,8 +854,8 @@ class Referee(object):
                     #     #print("Direção do Juiz Falhou. Nova direção: " + new_direction)
 
                 else:
-                    new_direction = current_dir
 
+                    new_direction = current_dir
 
         return ghost.getX(), ghost.getY(), new_direction
 
@@ -780,7 +873,7 @@ class Referee(object):
 
         for i in b_points:
             dist = self.calcDist(ghost.getX(), ghost.getY(), i[0], i[1])
-            if dist < 16.0:
+            if dist < 19.0:
                 return True
         return False
 
@@ -788,6 +881,8 @@ class Referee(object):
 
         if color == "red":
             ghost = copy(self.red_ghost)
+        elif color == "purple":
+            ghost = copy(self.purple_ghost)
 
         ghost_x = ghost.getX()
         ghost_y = ghost.getY()
