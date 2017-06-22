@@ -5,7 +5,7 @@ class Ghost(object):
 
     def __init__(self, color):
         self.radius = 10
-        self.color = self.set_color(color)
+        self.color = color
         self.afd = self.build_afd(color)
         self.x = 0
         self.y = 0
@@ -31,20 +31,8 @@ class Ghost(object):
 
         return pac_controller.load(g_afd)
 
-    def set_color(self, color):
-
-        g_color = (0,0,0)
-
-        if color == "red":
-            g_color = (255, 0, 0)
-        elif color == "orange":
-            g_color = (255, 127, 0)
-        elif color == "blue":
-            g_color = (0, 0, 204)
-        elif color == "purple":
-            g_color = (147, 112, 219)
-
-        return g_color
+    def get_color(self):
+        return self.color
 
     def getRadius(self):
         return self.radius
@@ -83,16 +71,19 @@ class Ghost(object):
 
         if color == "red":
             self.x = 340
-            self.y = 265
+            self.y = 250
 
         elif color == "orange":
             self.x = 400
-            self.y = 265
+            self.y = 250
 
         elif color == "blue":
             self.x = 365
-            self.y = 265
+            self.y = 250
 
         elif color == "purple":
             self.x = 435
-            self.y = 265
+            self.y = 250
+
+        self.current_direction = "up"
+        self.current_state = "0"

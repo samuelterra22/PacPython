@@ -75,6 +75,8 @@ class Referee(object):
         self.orange_ghost = Ghost("orange") # Sempre que o pacman muda de direção ele copia a direção contrária!
         self.purple_ghost = Ghost("purple") # Vai na direção do pacman
 
+        self.ghost_list = [self.red_ghost, self.blue_ghost, self.orange_ghost, self.purple_ghost]
+
         # Direções disponíveis:
 
         self.directions_available = ["up", "down", "left", "right"]
@@ -147,6 +149,7 @@ class Referee(object):
         self.lock_red = False
         self.lock_orange = False
         self.lock_purple = False
+
         self.fruit_power = False
 
         self.orange_next_dir = "up"
@@ -261,6 +264,49 @@ class Referee(object):
         # for i in range(len(self.capsules) / 2, len(self.capsules)):
         #     self.capsules2.append(self.capsules[i])
 
+    def loadObjectImages(self):
+
+        blue_img = pygame.image.load("Images/blue.png")
+        red_img = pygame.image.load("Images/red.png")
+        purple_img = pygame.image.load("Images/purple.png")
+        orange_img = pygame.image.load("Images/orange.png")
+
+        banana_img = pygame.image.load("Images/fruit1.png")
+        cherry_img = pygame.image.load("Images/fruit2.png")
+
+        life = pygame.image.load("Images/pacman.png")
+
+        banana = Fruits(640, 195, banana_img)
+        cherry = Fruits(170, 190, cherry_img)
+
+        self.lifes.append(life)
+        self.lifes.append(life)
+        self.lifes.append(life)
+
+        self.fruits.append(banana)
+        self.fruits.append(cherry)
+
+        self.banana = banana
+        self.cherry = cherry
+
+        self.blue_img = blue_img
+        self.orange_img = orange_img
+        self.red_img = red_img
+        self.purple_img = purple_img
+
+    def setInitialPositions(self):
+
+        # Posições iniciais do Pac-Man
+
+        self.pacman.setInitialPosition(self.boundarie_maze, self.height_game - self.boundarie_maze)
+
+        # Seta as posições iniciais dos ghosts
+
+        self.red_ghost.setInitialPosition("red")
+        self.blue_ghost.setInitialPosition("blue")
+        self.orange_ghost.setInitialPosition("orange")
+        self.purple_ghost.setInitialPosition("purple")
+
     # -------- Contador do Placar -------- #
 
     def score_counter(self):
@@ -320,11 +366,20 @@ class Referee(object):
 
         # Desenha os fantasmas
 
-        #pygame.draw.circle(self.gameDisplay, self.blue_ghost.getColor(), (self.blue_ghost.getX(), self.blue_ghost.getY()), self.blue_ghost.getRadius())
-        self.gameDisplay.blit(self.blue_img, (self.blue_ghost.getX(), self.blue_ghost.getY()))
-        self.gameDisplay.blit(self.red_img, (self.red_ghost.getX(), self.red_ghost.getY()))
-        self.gameDisplay.blit(self.orange_img, (self.orange_ghost.getX(), self.orange_ghost.getY()))
-        self.gameDisplay.blit(self.purple_img, (self.purple_ghost.getX(), self.purple_ghost.getY()))
+        for i in self.ghost_list:
+
+            ghost_color = i.getColor()
+
+            if ghost_color == "red":
+                self.gameDisplay.blit(self.red_img, (self.red_ghost.getX(), self.red_ghost.getY()))
+            elif ghost_color == "blue":
+                self.gameDisplay.blit(self.blue_img, (self.blue_ghost.getX(), self.blue_ghost.getY()))
+            elif ghost_color == "orange":
+                self.gameDisplay.blit(self.orange_img, (self.orange_ghost.getX(), self.orange_ghost.getY()))
+            elif ghost_color == "purple":
+                self.gameDisplay.blit(self.purple_img, (self.purple_ghost.getX(), self.purple_ghost.getY()))
+
+        # pygame.draw.circle(self.gameDisplay, self.blue_ghost.getColor(), (self.blue_ghost.getX(), self.blue_ghost.getY()), self.blue_ghost.getRadius())
         # pygame.draw.circle(self.gameDisplay, self.red_ghost.getColor(), (self.red_ghost.getX(), self.red_ghost.getY()), self.red_ghost.getRadius())
         # pygame.draw.circle(self.gameDisplay, self.orange_ghost.getColor(), (self.orange_ghost.getX(), self.orange_ghost.getY()), self.orange_ghost.getRadius())
         # pygame.draw.circle(self.gameDisplay, self.purple_ghost.getColor(), (self.purple_ghost.getX(), self.purple_ghost.getY()), self.purple_ghost.getRadius())
@@ -354,9 +409,6 @@ class Referee(object):
                     self.trans_pac_counter = self.aut_controller.move(self.pacman.getAFD(), 0, self.pacman.getDirection())
                 else:
                     self.trans_pac_counter = self.aut_controller.move(self.pacman.getAFD(), self.trans_pac_counter, self.pacman.getDirection())
-
-                #print("Estado: " + str(self.trans_pac_counter))
-
         # Fim do Jogo
 
     def red_automata(self):
@@ -384,9 +436,18 @@ class Referee(object):
                                                                   int(self.red_ghost.getState()),
                                                                   self.red_ghost.getDirection()))
             if self.red_ghost.getState() == "5":
-                print("VERMELHO PEGOU!")
-                self.game_exit = True
-            #print("Estado: " + self.red_ghost.getState())
+
+                if not self.fruit_power:
+
+                    if len(self.lifes) > 1:
+                        del self.lifes[len(self.lifes)-1]
+                        self.setInitialPositions()
+                    else:
+                        print("GAME OVER!")
+                        self.game_exit = True
+                else:
+                    self.ghost_list.remove(self.red_ghost)
+                    break
 
         # Fim do Jogo
 
@@ -413,11 +474,18 @@ class Referee(object):
                                                              int(self.blue_ghost.getState()),
                                                              self.blue_ghost.getDirection()))
             if self.blue_ghost.getState() == "5":
-                print("AZUL PEGOU!")
-                self.game_exit = True
-            #print("Estado: " + self.red_ghost.getState())
+                if not self.fruit_power:
 
-    # Fim do Jogo
+                    if len(self.lifes) > 1:
+                        del self.lifes[len(self.lifes)-1]
+                        self.setInitialPositions()
+                    else:
+                        print("GAME OVER!")
+                        self.game_exit = True
+                else:
+                    self.ghost_list.remove(self.blue_ghost)
+                    break
+        # Fim do Jogo
 
     def orange_automata(self):
 
@@ -443,10 +511,18 @@ class Referee(object):
                                                                   int(self.orange_ghost.getState()),
                                                                   self.orange_ghost.getDirection()))
             if self.orange_ghost.getState() == "5":
-                print("LARANJA PEGOU!")
-                self.game_exit = True
-            #print("Estado: " + self.red_ghost.getState())
-                # Fim do Jogo
+                if not self.fruit_power:
+
+                    if len(self.lifes) > 1:
+                        del self.lifes[len(self.lifes)-1]
+                        self.setInitialPositions()
+                    else:
+                        print("GAME OVER!")
+                        self.game_exit = True
+                else:
+                    self.ghost_list.remove(self.orange_ghost)
+                    break
+                    # Fim do Jogo
 
     def purple_automata(self):
 
@@ -458,7 +534,6 @@ class Referee(object):
             self.clock.tick(self.fps_ghosts)
 
             if not self.lock_purple:
-
                 new_x, new_y, new_direction = self.move_ghosts("purple")
 
                 self.purple_ghost.setDirection(new_direction)
@@ -473,10 +548,17 @@ class Referee(object):
                                                                   int(self.purple_ghost.getState()),
                                                                   self.purple_ghost.getDirection()))
             if self.purple_ghost.getState() == "5":
-                print("LILÁS PEGOU!")
-                self.game_exit = True
-            #print("Estado: " + self.purple_ghost.getState())
+                if not self.fruit_power:
 
+                    if len(self.lifes) > 1:
+                        del self.lifes[len(self.lifes)-1]
+                        self.setInitialPositions()
+                    else:
+                        print("GAME OVER!")
+                        self.game_exit = True
+                else:
+                    self.ghost_list.remove(self.purple_ghost)
+                    break
         # Fim do Jogo
 
     def control_red(self):
@@ -504,6 +586,31 @@ class Referee(object):
             self.purple_ghost.setDirection(new_direction)
             self.purple_ghost.setX(new_x)
             self.purple_ghost.setY(new_y)
+
+    def power_pacman(self):
+
+        while not self.game_exit:
+            if self.fruit_power:
+                white_img = pygame.image.load("Images/white.png")
+
+                self.red_img = white_img
+                self.blue_img = white_img
+                self.orange_img = white_img
+                self.purple_img = white_img
+
+                time.sleep(10)
+
+                blue_img = pygame.image.load("Images/blue.png")
+                red_img = pygame.image.load("Images/red.png")
+                purple_img = pygame.image.load("Images/purple.png")
+                orange_img = pygame.image.load("Images/orange.png")
+
+                self.red_img = red_img
+                self.blue_img = blue_img
+                self.orange_img = orange_img
+                self.purple_img = purple_img
+
+                self.fruit_power = False
 
     # -------- Looping principal do jogo -------- #
 
@@ -533,6 +640,8 @@ class Referee(object):
 
         t_control_purple = Threads.Thread(target=self.control_purple, args=())
 
+        t_power_mode = Threads.Thread(target=self.power_pacman, args=())
+
         t_game.start()
         t_pacman.start()
         t_red.start()
@@ -541,50 +650,16 @@ class Referee(object):
         t_purple.start()
         t_control_red.start()
         t_control_purple.start()
+        t_power_mode.start()
 
     def gameLoop(self):
 
         pygame.init()
         pygame.mixer.init()
 
-        blue_img = pygame.image.load("Images/blue.png")
-        red_img = pygame.image.load("Images/red.png")
-        purple_img = pygame.image.load("Images/purple.png")
-        orange_img = pygame.image.load("Images/orange.png")
+        self.loadObjectImages()
 
-        banana_img = pygame.image.load("Images/fruit1.png")
-        cherry_img = pygame.image.load("Images/fruit2.png")
-
-        life = pygame.image.load("Images/pacman.png")
-
-        self.lifes.append(life)
-        self.lifes.append(life)
-        self.lifes.append(life)
-
-        banana = Fruits(640, 195, banana_img)
-        cherry = Fruits(170, 190, cherry_img)
-
-        self.fruits.append(banana)
-        self.fruits.append(cherry)
-
-        self.banana = banana
-        self.cherry = cherry
-
-        self.blue_img = blue_img
-        self.orange_img = orange_img
-        self.red_img = red_img
-        self.purple_img = purple_img
-
-        # Posições iniciais do Pac-Man
-
-        self.pacman.setInitialPosition(self.boundarie_maze, self.height_game - self.boundarie_maze)
-
-        # Seta as posições iniciais dos ghosts
-
-        self.red_ghost.setInitialPosition("red")
-        self.blue_ghost.setInitialPosition("blue")
-        self.orange_ghost.setInitialPosition("orange")
-        self.purple_ghost.setInitialPosition("purple")
+        self.setInitialPositions()
 
         # Variáveis para a mudança de posição do pacman
 
@@ -724,7 +799,7 @@ class Referee(object):
 
             for i in self.fruits:
                 dist = self.calcDist(self.pacman.getX(), self.pacman.getY(), i.getX(), i.getY())
-                if dist < 19.0:
+                if dist < 30.0:
                     self.fruits.remove(i)
                     self.fruit_power = True
                     break
@@ -790,7 +865,7 @@ class Referee(object):
         # Verifica a coolisão com o Pacman
 
         dist = self.calcDist(self.pacman.getX(), self.pacman.getY(), ghost.getX(), ghost.getY())
-        if dist < float(self.red_ghost.getRadius() + self.pacman.getRadius() - 5):
+        if dist < 20:
             pacman_collision = True
             new_direction = "pac"
 
@@ -804,7 +879,6 @@ class Referee(object):
                 aux.remove(current_dir)
                 new_direction = choice(aux)
                 border_collision = True
-
 
                 # if self.lock_red:
                 #     #print("Direção do Juiz Falhou. Nova direção: " + new_direction)
@@ -873,7 +947,7 @@ class Referee(object):
 
         for i in b_points:
             dist = self.calcDist(ghost.getX(), ghost.getY(), i[0], i[1])
-            if dist < 19.0:
+            if dist < 25.0:
                 return True
         return False
 
