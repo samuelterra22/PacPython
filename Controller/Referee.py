@@ -264,6 +264,28 @@ class Referee(object):
         # for i in range(len(self.capsules) / 2, len(self.capsules)):
         #     self.capsules2.append(self.capsules[i])
 
+    def playKillSound(self):
+
+        ghosts_remaining = len(self.ghost_list)
+
+        if ghosts_remaining == 3:
+            pygame.mixer.music.load(open("Sounds/first_blood.wav", "rb"))
+            pygame.mixer.music.play()
+            #while pygame.mixer.music.get_busy():
+                #time.sleep(0.5)
+        elif ghosts_remaining == 2:
+            pygame.mixer.music.load(open("Sounds/killing_spree.wav", "rb"))
+            pygame.mixer.music.play()
+
+        elif ghosts_remaining == 1:
+            pygame.mixer.music.load(open("Sounds/monster_kill.wav", "rb"))
+            pygame.mixer.music.play()
+
+        elif ghosts_remaining == 0:
+            pygame.mixer.music.load(open("Sounds/wicked_sick.wav", "rb"))
+            pygame.mixer.music.play()
+
+
     def loadObjectImages(self):
 
         blue_img = pygame.image.load("Images/blue.png")
@@ -447,6 +469,7 @@ class Referee(object):
                         self.game_exit = True
                 else:
                     self.ghost_list.remove(self.red_ghost)
+                    self.playKillSound()
                     break
 
         # Fim do Jogo
@@ -484,6 +507,7 @@ class Referee(object):
                         self.game_exit = True
                 else:
                     self.ghost_list.remove(self.blue_ghost)
+                    self.playKillSound()
                     break
         # Fim do Jogo
 
@@ -521,6 +545,7 @@ class Referee(object):
                         self.game_exit = True
                 else:
                     self.ghost_list.remove(self.orange_ghost)
+                    self.playKillSound()
                     break
                     # Fim do Jogo
 
@@ -558,6 +583,7 @@ class Referee(object):
                         self.game_exit = True
                 else:
                     self.ghost_list.remove(self.purple_ghost)
+                    self.playKillSound()
                     break
         # Fim do Jogo
 
@@ -788,10 +814,6 @@ class Referee(object):
                 dist = self.calcDist(self.pacman.getX(), self.pacman.getY(), i[0], i[1])
                 if dist < float(self.pacman.getRadius() + self.capsule_radius):
                     self.pacman.setCapsules(self.pacman.getCapsules() + 1)
-                    #pygame.mixer.music.load(open("Sounds/eat_capsules.wav", "rb"))
-                    #pygame.mixer.music.play()
-                    #while pygame.mixer.music.get_busy():
-                    #     time.sleep(0.5)
                     self.capsules.remove(i)
                     break
 
@@ -865,7 +887,7 @@ class Referee(object):
         # Verifica a coolisão com o Pacman
 
         dist = self.calcDist(self.pacman.getX(), self.pacman.getY(), ghost.getX(), ghost.getY())
-        if dist < 20:
+        if dist < 18:
             pacman_collision = True
             new_direction = "pac"
 
