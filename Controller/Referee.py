@@ -717,6 +717,7 @@ class Referee(object):
                 print('GANHOU!')
                 self.game_exit = True
             for event in pygame.event.get():
+                print(event)
                 if event.type == pygame.QUIT:
                     self.game_exit = True
                 elif event.type == pygame.KEYDOWN:
