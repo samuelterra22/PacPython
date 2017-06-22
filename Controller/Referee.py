@@ -52,6 +52,7 @@ class Referee(object):
 
         self.banana = None
         self.cherry = None
+        self.pineaple = None
 
         # Vidas
 
@@ -295,11 +296,13 @@ class Referee(object):
 
         banana_img = pygame.image.load("Images/fruit1.png")
         cherry_img = pygame.image.load("Images/fruit2.png")
+        pineaple_img = pygame.image.load("Images/fruit3.png")
 
         life = pygame.image.load("Images/pacman.png")
 
         banana = Fruits(640, 195, banana_img)
         cherry = Fruits(170, 190, cherry_img)
+        pineaple = Fruits(282, 490, pineaple_img)
 
         self.lifes.append(life)
         self.lifes.append(life)
@@ -307,9 +310,11 @@ class Referee(object):
 
         self.fruits.append(banana)
         self.fruits.append(cherry)
+        self.fruits.append(pineaple)
 
         self.banana = banana
         self.cherry = cherry
+        self.pineaple = pineaple
 
         self.blue_img = blue_img
         self.orange_img = orange_img
