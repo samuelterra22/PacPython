@@ -36,7 +36,7 @@ class Referee(object):
                     (292, 280, 470, 280), (470, 288, 470, 200), (145, 203, 145, 303), (207, 203, 247, 203),
                     (526, 286, 556, 286), (123, 360, 293, 360),
                     (52, 414, 52, 134), (141, 110, 240, 110), (146, 170, 200, 170), (562, 52, 780, 52),
-                    (294, 114, 400, 114), (474, 136, 474, 66),
+                    (294, 114, 400, 114), (474, 100, 474, 66),
                     (541, 163, 700, 163), (620, 166, 620, 266), (750, 112, 780, 112), (750, 335, 750, 200)]
 
         # Cápsulas
@@ -272,8 +272,7 @@ class Referee(object):
         if ghosts_remaining == 3:
             pygame.mixer.music.load(open("Sounds/first_blood.wav", "rb"))
             pygame.mixer.music.play()
-            #while pygame.mixer.music.get_busy():
-                #time.sleep(0.5)
+
         elif ghosts_remaining == 2:
             pygame.mixer.music.load(open("Sounds/killing_spree.wav", "rb"))
             pygame.mixer.music.play()
@@ -468,7 +467,10 @@ class Referee(object):
 
                     if len(self.lifes) > 1:
                         del self.lifes[len(self.lifes)-1]
+                        pygame.mixer.music.load(open("Sounds/kill_pacman.wav", "rb"))
+                        pygame.mixer.music.play()
                         self.setInitialPositions()
+
                     else:
                         print("GAME OVER!")
                         self.game_exit = True
@@ -506,6 +508,8 @@ class Referee(object):
 
                     if len(self.lifes) > 1:
                         del self.lifes[len(self.lifes)-1]
+                        pygame.mixer.music.load(open("Sounds/kill_pacman.wav", "rb"))
+                        pygame.mixer.music.play()
                         self.setInitialPositions()
                     else:
                         print("GAME OVER!")
@@ -544,6 +548,8 @@ class Referee(object):
 
                     if len(self.lifes) > 1:
                         del self.lifes[len(self.lifes)-1]
+                        pygame.mixer.music.load(open("Sounds/kill_pacman.wav", "rb"))
+                        pygame.mixer.music.play()
                         self.setInitialPositions()
                     else:
                         print("GAME OVER!")
@@ -582,6 +588,8 @@ class Referee(object):
 
                     if len(self.lifes) > 1:
                         del self.lifes[len(self.lifes)-1]
+                        pygame.mixer.music.load(open("Sounds/kill_pacman.wav", "rb"))
+                        pygame.mixer.music.play()
                         self.setInitialPositions()
                     else:
                         print("GAME OVER!")
@@ -717,7 +725,6 @@ class Referee(object):
                 print('GANHOU!')
                 self.game_exit = True
             for event in pygame.event.get():
-                print(event)
                 if event.type == pygame.QUIT:
                     self.game_exit = True
                 elif event.type == pygame.KEYDOWN:
@@ -968,7 +975,7 @@ class Referee(object):
 
     def ghost_barrier_colision(self, ghost):
 
-        if ghost.getX() > self.barrier_points1[1980][0]:
+        if ghost.getX() > self.barrier_points1[1962][0]:
             b_points = self.barrier_points2
         else:
             b_points = self.barrier_points1
