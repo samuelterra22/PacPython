@@ -159,6 +159,45 @@ class Referee(object):
 
         self.aut_controller = AFDController()
 
+    def endGame(self, status):
+
+        if status == "win":
+
+            count = 5
+            blink = False
+            pygame.mixer.music.load(open("Sounds/flawless_victory.wav", "rb"))
+            pygame.mixer.music.play()
+            while count > 0:
+                blink = not blink
+                if blink:
+                    font = pygame.font.SysFont(None, 40)
+                    phrase = "YOU WIN!!!!"
+                    screen_text = font.render(phrase, True, self.green)
+                    self.gameDisplay.blit(screen_text, [348, 644])
+                    pygame.display.update()
+                    time.sleep(0.7)
+                    count -= 1
+                self.draw_game(self.capsules, self.barriers)
+            #self.game_exit = True
+        else:
+
+            count = 5
+            blink = False
+            pygame.mixer.music.load(open("Sounds/oh_shit.wav", "rb"))
+            pygame.mixer.music.play()
+            while count > 0:
+                blink = not blink
+                if blink:
+                    font = pygame.font.SysFont(None, 40)
+                    phrase = "YOU LOOOOOSE!!!!"
+                    screen_text = font.render(phrase, True, self.red)
+                    self.gameDisplay.blit(screen_text, [348, 644])
+                    pygame.display.update()
+                    time.sleep(0.7)
+                    count -= 1
+                self.draw_game(self.capsules, self.barriers)
+            #self.game_exit = True
+
     # ------- * Construtor da lista de barreiras do labirinto ------- * #
 
     def build_barrier_points(self):
@@ -465,15 +504,15 @@ class Referee(object):
 
                 if not self.fruit_power:
 
-                    if len(self.lifes) > 1:
+                    if len(self.lifes) > 0:
                         del self.lifes[len(self.lifes)-1]
                         pygame.mixer.music.load(open("Sounds/kill_pacman.wav", "rb"))
                         pygame.mixer.music.play()
                         self.setInitialPositions()
 
                     else:
-                        print("GAME OVER!")
                         self.game_exit = True
+                        self.endGame("lose")
                 else:
                     self.ghost_list.remove(self.red_ghost)
                     self.playKillSound()
@@ -506,14 +545,14 @@ class Referee(object):
             if self.blue_ghost.getState() == "5":
                 if not self.fruit_power:
 
-                    if len(self.lifes) > 1:
+                    if len(self.lifes) > 0:
                         del self.lifes[len(self.lifes)-1]
                         pygame.mixer.music.load(open("Sounds/kill_pacman.wav", "rb"))
                         pygame.mixer.music.play()
                         self.setInitialPositions()
                     else:
-                        print("GAME OVER!")
                         self.game_exit = True
+                        self.endGame("lose")
                 else:
                     self.ghost_list.remove(self.blue_ghost)
                     self.playKillSound()
@@ -546,14 +585,14 @@ class Referee(object):
             if self.orange_ghost.getState() == "5":
                 if not self.fruit_power:
 
-                    if len(self.lifes) > 1:
+                    if len(self.lifes) > 0:
                         del self.lifes[len(self.lifes)-1]
                         pygame.mixer.music.load(open("Sounds/kill_pacman.wav", "rb"))
                         pygame.mixer.music.play()
                         self.setInitialPositions()
                     else:
-                        print("GAME OVER!")
                         self.game_exit = True
+                        self.endGame("lose")
                 else:
                     self.ghost_list.remove(self.orange_ghost)
                     self.playKillSound()
@@ -586,14 +625,14 @@ class Referee(object):
             if self.purple_ghost.getState() == "5":
                 if not self.fruit_power:
 
-                    if len(self.lifes) > 1:
+                    if len(self.lifes) > 0:
                         del self.lifes[len(self.lifes)-1]
                         pygame.mixer.music.load(open("Sounds/kill_pacman.wav", "rb"))
                         pygame.mixer.music.play()
                         self.setInitialPositions()
                     else:
-                        print("GAME OVER!")
                         self.game_exit = True
+                        self.endGame("lose")
                 else:
                     self.ghost_list.remove(self.purple_ghost)
                     self.playKillSound()
@@ -718,133 +757,136 @@ class Referee(object):
         self.build_capsules()
 
     # Loop do jogo
-
+        x_pressed = False
         while not self.game_exit:
             self.go_ghosts = True
             if self.pacman.getCapsules() == 155:
-                print('GANHOU!')
                 self.game_exit = True
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    self.game_exit = True
-                elif event.type == pygame.KEYDOWN:
-                    self.walk = True
-                    if event.key == pygame.K_LEFT:
-                        pacman_x_change = -self.change_rate
-                        pacman_y_change = 0
-                        self.orange_next_dir = "right"
-                        self.lock_orange = True
-                        self.pacman.setDirection("left")
-                        # Testa se está tentando atravessar a parede.
-                        if aux_x > -1:
-                            test_dist = self.calcDist(self.pacman.getX() + pacman_x_change, self.pacman.getY(), aux_x, aux_y)
-                            if test_dist > 19.0:
-                                able = True
+                self.endGame("win")
+            else:
+                for event in pygame.event.get():
+                    if event.type == pygame.QUIT:
+                        self.game_exit = True
+                        x_pressed = True
+                    elif event.type == pygame.KEYDOWN:
+                        self.walk = True
+                        if event.key == pygame.K_LEFT:
+                            pacman_x_change = -self.change_rate
+                            pacman_y_change = 0
+                            self.orange_next_dir = "right"
+                            self.lock_orange = True
+                            self.pacman.setDirection("left")
+                            # Testa se está tentando atravessar a parede.
+                            if aux_x > -1:
+                                test_dist = self.calcDist(self.pacman.getX() + pacman_x_change, self.pacman.getY(), aux_x, aux_y)
+                                if test_dist > 19.0:
+                                    able = True
 
-                    elif event.key == pygame.K_RIGHT:
-                        pacman_x_change = self.change_rate
-                        pacman_y_change = 0
-                        self.orange_next_dir = "left"
-                        self.lock_orange = True
-                        self.pacman.setDirection("right")
-                        # Testa se está tentando atravessar a parede.
-                        if aux_x > -1:
-                            test_dist = self.calcDist(self.pacman.getX() + pacman_x_change, self.pacman.getY(), aux_x, aux_y)
-                            if test_dist > 19.0:
-                                able = True
+                        elif event.key == pygame.K_RIGHT:
+                            pacman_x_change = self.change_rate
+                            pacman_y_change = 0
+                            self.orange_next_dir = "left"
+                            self.lock_orange = True
+                            self.pacman.setDirection("right")
+                            # Testa se está tentando atravessar a parede.
+                            if aux_x > -1:
+                                test_dist = self.calcDist(self.pacman.getX() + pacman_x_change, self.pacman.getY(), aux_x, aux_y)
+                                if test_dist > 19.0:
+                                    able = True
 
-                    elif event.key == pygame.K_UP:
-                        pacman_y_change = -self.change_rate
-                        pacman_x_change = 0
-                        self.pacman.setDirection("up")
-                        self.lock_orange = True
-                        self.orange_next_dir = "down"
-                        # Testa se está tentando atravessar a parede.
-                        if aux_x > -1:
-                            test_dist = self.calcDist(self.pacman.getX(), self.pacman.getY() + pacman_y_change, aux_x, aux_y)
-                            if test_dist > 19.0:
-                                able = True
+                        elif event.key == pygame.K_UP:
+                            pacman_y_change = -self.change_rate
+                            pacman_x_change = 0
+                            self.pacman.setDirection("up")
+                            self.lock_orange = True
+                            self.orange_next_dir = "down"
+                            # Testa se está tentando atravessar a parede.
+                            if aux_x > -1:
+                                test_dist = self.calcDist(self.pacman.getX(), self.pacman.getY() + pacman_y_change, aux_x, aux_y)
+                                if test_dist > 19.0:
+                                    able = True
 
-                    elif event.key == pygame.K_DOWN:
-                        pacman_y_change = self.change_rate
-                        pacman_x_change = 0
-                        self.pacman.setDirection("down")
-                        self.lock_orange = True
-                        self.orange_next_dir = "up"
-                        # Testa se está tentando atravessar a parede.
-                        if aux_x > -1:
-                            test_dist = self.calcDist(self.pacman.getX(), self.pacman.getY() + pacman_y_change, aux_x, aux_y)
-                            if test_dist > 19.0:
-                                able = True
+                        elif event.key == pygame.K_DOWN:
+                            pacman_y_change = self.change_rate
+                            pacman_x_change = 0
+                            self.pacman.setDirection("down")
+                            self.lock_orange = True
+                            self.orange_next_dir = "up"
+                            # Testa se está tentando atravessar a parede.
+                            if aux_x > -1:
+                                test_dist = self.calcDist(self.pacman.getX(), self.pacman.getY() + pacman_y_change, aux_x, aux_y)
+                                if test_dist > 19.0:
+                                    able = True
 
-                # Se nenhuma tecla foi pressionada
-                else:
+                    # Se nenhuma tecla foi pressionada
+                    else:
+                        self.walk = False
+                        self.pacman.setDirection("None")
+
+                # Atualiza a posição do pacman
+                if able:
+                    self.pacman.setX(self.pacman.getX() + pacman_x_change)
+                    self.pacman.setY(self.pacman.getY() + pacman_y_change)
+
+                # Verifica as bordas.
+
+                if self.pacman.getX() > self.boundarie_x_pacman:
+                    self.pacman.setX(self.boundarie_x_pacman)
                     self.walk = False
-                    self.pacman.setDirection("None")
-
-            # Atualiza a posição do pacman
-            if able:
-                self.pacman.setX(self.pacman.getX() + pacman_x_change)
-                self.pacman.setY(self.pacman.getY() + pacman_y_change)
-
-            # Verifica as bordas.
-
-            if self.pacman.getX() > self.boundarie_x_pacman:
-                self.pacman.setX(self.boundarie_x_pacman)
-                self.walk = False
-            elif self.pacman.getX() < self.boundarie_maze_g:
-                self.pacman.setX(self.boundarie_maze_g)
-                self.walk = False
-            if self.pacman.getY() > self.boundarie_y_pacman:
-                self.pacman.setY(self.boundarie_y_pacman)
-                self.walk = False
-            elif self.pacman.getY() < self.boundarie_maze_g:
-                self.pacman.setY(self.boundarie_maze_g)
-                self.walk = False
-
-            # Verifica a coolisão com barreiras.
-
-            if self.pacman.getX() > self.barrier_points1[len(self.barrier_points)/2 - 1][0]:
-                b_points = self.barrier_points2
-            else: b_points = self.barrier_points1
-
-            for i in b_points:
-                dist = self.calcDist(self.pacman.getX(), self.pacman.getY(), i[0], i[1])
-                if dist < 19.0:
-                    pacman_y_change = 0
-                    pacman_x_change = 0
-                    able = False
+                elif self.pacman.getX() < self.boundarie_maze_g:
+                    self.pacman.setX(self.boundarie_maze_g)
                     self.walk = False
-                    aux_x = i[0]
-                    aux_y = i[1]
-                    break
-                else:
-                    able = True
+                if self.pacman.getY() > self.boundarie_y_pacman:
+                    self.pacman.setY(self.boundarie_y_pacman)
+                    self.walk = False
+                elif self.pacman.getY() < self.boundarie_maze_g:
+                    self.pacman.setY(self.boundarie_maze_g)
+                    self.walk = False
 
-            # Verifica o ingerir de capsulas
+                # Verifica a coolisão com barreiras.
 
-            for i in self.capsules:
-                dist = self.calcDist(self.pacman.getX(), self.pacman.getY(), i[0], i[1])
-                if dist < float(self.pacman.getRadius() + self.capsule_radius):
-                    self.pacman.setCapsules(self.pacman.getCapsules() + 1)
-                    self.capsules.remove(i)
-                    break
+                if self.pacman.getX() > self.barrier_points1[len(self.barrier_points)/2 - 1][0]:
+                    b_points = self.barrier_points2
+                else: b_points = self.barrier_points1
 
-            # Verifica o ingerir das frutas
+                for i in b_points:
+                    dist = self.calcDist(self.pacman.getX(), self.pacman.getY(), i[0], i[1])
+                    if dist < 19.0:
+                        pacman_y_change = 0
+                        pacman_x_change = 0
+                        able = False
+                        self.walk = False
+                        aux_x = i[0]
+                        aux_y = i[1]
+                        break
+                    else:
+                        able = True
 
-            for i in self.fruits:
-                dist = self.calcDist(self.pacman.getX(), self.pacman.getY(), i.getX(), i.getY())
-                if dist < 30.0:
-                    self.fruits.remove(i)
-                    self.fruit_power = True
-                    break
+                # Verifica o ingerir de capsulas
 
-            # Atualiza o Cenário
+                for i in self.capsules:
+                    dist = self.calcDist(self.pacman.getX(), self.pacman.getY(), i[0], i[1])
+                    if dist < float(self.pacman.getRadius() + self.capsule_radius):
+                        self.pacman.setCapsules(self.pacman.getCapsules() + 1)
+                        self.capsules.remove(i)
+                        break
 
-            self.draw_game(self.capsules, self.barriers)
+                # Verifica o ingerir das frutas
+
+                for i in self.fruits:
+                    dist = self.calcDist(self.pacman.getX(), self.pacman.getY(), i.getX(), i.getY())
+                    if dist < 30.0:
+                        self.fruits.remove(i)
+                        self.fruit_power = True
+                        break
+
+                # Atualiza o Cenário
+
+                self.draw_game(self.capsules, self.barriers)
 
         # End While
-        pygame.quit()
+        if x_pressed:
+            pygame.quit()
         quit()
 
     def move_ghosts(self, color):
