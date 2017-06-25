@@ -138,7 +138,6 @@ class AFDController(object):
 
         transicoes = afd.getTransitions()  # Pega a lista de transições do AFD
         estados_finais = afd.getFinals()  # Pega a lista de estados finais do AFD
-        id = str(id)  # Converte o ID em string
 
         # Percorre todas as transições procurando a transição entre o caractere da palavra e o estado passado
         for t in transicoes:

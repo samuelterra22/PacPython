@@ -1,5 +1,6 @@
 # coding=utf-8
 from Controller.AFDController import AFDController
+from Controller.ScreenControl import ScreenControl
 
 class Pacman(object):
 
@@ -12,6 +13,7 @@ class Pacman(object):
         self.y = 0
         self.current_direction = "None"
         self.capsules_earned = 0
+        self.state = "0"
 
     def build_afd(self):
         pac_controller = AFDController()
@@ -32,6 +34,9 @@ class Pacman(object):
     def getY(self):
         return self.y
 
+    def getState(self):
+        return self.state
+
     def getDirection(self):
         return self.current_direction
 
@@ -50,9 +55,10 @@ class Pacman(object):
     def setY(self, y):
          self.y = y
 
-    def setInitialPosition(self, x, y):
-        self.x = x
-        self.y = y
+    def setState(self, state):
+        self.state = state
 
-
-
+    def setInitialPosition(self):
+        Screen = ScreenControl()
+        self.x = Screen.boundarie_maze
+        self.y = Screen.height_game - Screen.boundarie_maze

@@ -1,4 +1,5 @@
 from Controller.AFDController import AFDController
+import pygame
 
 class Ghost(object):
 
@@ -10,7 +11,8 @@ class Ghost(object):
         self.x = 0
         self.y = 0
         self.current_direction = "up"
-        self.current_state = "0"
+        self.state = "0"
+        self.image = self.buildImage(color)
 
     def build_afd(self, color):
 
@@ -31,6 +33,24 @@ class Ghost(object):
 
         return pac_controller.load(g_afd)
 
+    def buildImage(self, color):
+
+        img = ""
+
+        if color == "red":
+            img = "Images/red.png"
+
+        elif color == "orange":
+            img = "Images/orange.png"
+
+        elif color == "blue":
+            img = "Images/blue.png"
+
+        elif color == "purple":
+            img = "Images/purple.png"
+
+        return pygame.image.load(img)
+
     def get_color(self):
         return self.color
 
@@ -39,6 +59,9 @@ class Ghost(object):
 
     def getColor(self):
         return self.color
+
+    def getImage(self):
+        return self.image
 
     def getAFD(self):
         return self.afd
@@ -53,7 +76,7 @@ class Ghost(object):
         return self.current_direction
 
     def getState(self):
-        return self.current_state
+        return self.state
 
     def setDirection(self, dir):
         self.current_direction = dir
@@ -65,7 +88,28 @@ class Ghost(object):
          self.y = y
 
     def setState(self, id):
-        self.current_state = id
+        self.state = id
+
+    def setImage(self, color):
+
+        img = ""
+
+        if color == "red":
+            img = "Images/red.png"
+
+        elif color == "orange":
+            img = "Images/orange.png"
+
+        elif color == "blue":
+            img = "Images/blue.png"
+
+        elif color == "purple":
+            img = "Images/purple.png"
+
+        elif color == "white":
+            img = "Images/white.png"
+
+        self.image = pygame.image.load(img)
 
     def setInitialPosition(self, color):
 
@@ -86,4 +130,4 @@ class Ghost(object):
             self.y = 250
 
         self.current_direction = "up"
-        self.current_state = "0"
+        self.state = "0"

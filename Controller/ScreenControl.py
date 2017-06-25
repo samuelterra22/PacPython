@@ -1,6 +1,4 @@
 # -*- coding: utf-8 -*-
-from Model.Pacman import Pacman
-from Model.Ghost import Ghost
 import pygame
 
 class ScreenControl(object):
@@ -32,51 +30,15 @@ class ScreenControl(object):
                          (294, 114, 400, 114), (474, 100, 474, 66),
                          (541, 163, 700, 163), (620, 166, 620, 266), (750, 112, 780, 112), (750, 335, 750, 200)]
 
-        # Cápsulas
-
-        self.capsules = []
-
-        # Powerfull Fruits!!
-
-        self.banana = None
-        self.cherry = None
-        self.pineaple = None
-
-        self.fruits = [self.banana, self.cherry, self.pineaple]
-
-        # Vidas
-
-        self.lifes = []
-
-        # Imagens dos fantasmas
-
-        self.blue_img = None
-        self.red_img = None
-        self.orange_img = None
-        self.purple_img = None
-
-        # Inicializa um Pacman!!
-
-        self.pacman = Pacman()
-
-        # Inicializa os fantasmas
-
-        self.red_ghost = Ghost("red")  # De 5 em 5 segundos recebe a posição do pacman (absoluta)
-        self.blue_ghost = Ghost("blue")  # Random
-        self.orange_ghost = Ghost("orange")  # Sempre que o pacman muda de direção ele copia a direção contrária!
-        self.purple_ghost = Ghost("purple")  # Vai na direção do pacman
-
-        self.ghost_list = [self.red_ghost, self.blue_ghost, self.orange_ghost, self.purple_ghost]
-
         # Direções disponíveis:
 
         self.directions_available = ["up", "down", "left", "right"]
 
-        # Todos os pontos do mapa que contém um obstáculo
+        # Vidas
 
-        self.barrier_points = []
-        self.barrier_points1 = []
-        self.barrier_points2 = []
+        life = pygame.image.load("Images/pacman.png")
+
+        self.lifes = [life, life, life]
 
         # FPS e blocos que os elementos móveis se movimentam por vez.
 
@@ -96,17 +58,14 @@ class ScreenControl(object):
         self.width = 800
         self.height = 700
 
-        self.gameDisplay = pygame.display.set_mode((self.width, self.height))
-        pygame.display.set_caption("PacPython \o/")
-
         # Largura da borda
 
         self.border_width_game = 5
 
         # Limite das bordas do labirinto
 
-        self.boundarie_maze = self.pacman.getRadius() + self.border_width_game
-        self.boundarie_maze_g = self.red_ghost.getRadius() + self.border_width_game
+        self.boundarie_maze = 18
+        self.boundarie_maze_g = 15
 
         # Limites até onde o pacman pode alcançar
 
@@ -120,3 +79,123 @@ class ScreenControl(object):
         # Clock para definir os Frames por segundo
 
         self.clock = pygame.time.Clock()
+
+    def build_barrier_points(self):
+
+        barrier_points = []
+        barrier_points1 = []
+        barrier_points2 = []
+
+        for i in self.barriers:
+            # Barreiras Horizontais
+
+            if i[1] == i[3]:
+                if i[0] > i[2]:
+                    for x in range(i[2], i[0] + 1):
+                        barrier_points.append((x, i[1]))
+                else:
+                    for x in range(i[0], i[2] + 1):
+                        barrier_points.append((x, i[1]))
+
+            # Barreiras Verticais
+
+            if i[0] == i[2]:
+                if i[1] > i[3]:
+                    for y in range(i[3], i[1] + 1):
+                        barrier_points.append((i[0], y))
+                else:
+                    for y in range(i[1], i[3] + 1):
+                        barrier_points.append((i[0], y))
+                        # Ordena a lista de obstáculos pelo valor de x (x,y)
+
+        barrier_points.sort(key=lambda tup: tup[0])
+
+        # Divide a lista ao meio para acelerar o processamento
+
+        for i in range(0, len(barrier_points) / 2):
+            barrier_points1.append(barrier_points[i])
+
+        for i in range(len(barrier_points) / 2, len(barrier_points)):
+            barrier_points2.append(barrier_points[i])
+
+        return barrier_points, barrier_points1, barrier_points2
+
+    # ------- * Construtor da lista de cápsulas do labirinto ------- * #
+
+    def build_capsules(self):
+
+        capsules = []
+        dist_capsules = 20
+
+        for i in range(0, 17):
+            capsules.append(((self.boundarie_maze + dist_capsules), self.boundarie_y_pacman))
+            dist_capsules += 40
+
+        dist_capsules = 0
+
+        for i in range(0, 20):
+            capsules.append(((46 + dist_capsules), 26))
+            dist_capsules += 40
+
+        dist_capsules = 0
+
+        for i in range(0, 11):
+            capsules.append((25, (452 - dist_capsules)))
+            capsules.append((85, (25 + dist_capsules)))
+            capsules.append((778, (158 + dist_capsules)))
+            dist_capsules += 40
+
+        dist_capsules = 0
+
+        for i in range(0, 15):
+            capsules.append(((132 + dist_capsules), 324))
+            dist_capsules += 40
+
+        dist_capsules = 0
+
+        for i in range(0, 8):
+            capsules.append(((456 + dist_capsules), 388))
+            capsules.append(((125 + dist_capsules), 85))
+            capsules.append(((125 + dist_capsules), 145))
+
+            dist_capsules += 40
+
+        dist_capsules = 0
+
+        for i in range(0, 7):
+            capsules.append(((376 - dist_capsules), 385))
+            capsules.append(((298 + dist_capsules), 473))
+            capsules.append(((565 + dist_capsules), 91))
+            capsules.append((724, (122 + dist_capsules)))
+            dist_capsules += 40
+
+        dist_capsules = 0
+
+        for i in range(0, 3):
+            capsules.append((526, (49 + dist_capsules)))
+            capsules.append((526, (170 + dist_capsules)))
+            capsules.append((335, (433 + dist_capsules)))
+            capsules.append((173, (424 + dist_capsules)))
+            capsules.append(((176 + dist_capsules), 255))
+            capsules.append((696, (429 + dist_capsules)))
+            capsules.append(((12 + dist_capsules), 509))
+            dist_capsules += 40
+
+            # # Divide a lista de cápsulas em 2, para agilizar o procesamento.
+            #
+            # self.capsules.sort(key=lambda tup: tup[0])
+            #
+            # for i in range(0, len(self.capsules) / 2):
+            #     self.capsules1.append(self.capsules[i])
+            #
+            # for i in range(len(self.capsules) / 2, len(self.capsules)):
+            #     self.capsules2.append(self.capsules[i])
+        return capsules
+
+    def buildDisplay(self):
+
+        gameDisplay = None
+        gameDisplay = pygame.display.set_mode((self.width, self.height))
+        pygame.display.set_caption("PacPython \o/")
+
+        return gameDisplay
