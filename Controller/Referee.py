@@ -317,13 +317,16 @@ class Referee(object):
             if self.walk:
                 self.pacman.setState(self.aut_controller.move(self.pacman.getAFD(),
                                      self.pacman.getState(), self.pacman.getDirection()))
-            #time.sleep(self.sleeptime)
+            time.sleep(1)
 
         # Fim do Jogo
 
     def red_automata(self):
 
-        # Função que roda o autômato do fantasma vermelho
+        # Função que roda o autômato do fantasma vermelho, que se movimenta
+        # de acordo com os sinais enviados pelo árbitro de 4 em 4 segundos.
+        # O árbitro tem prioridade para definir a direção do ghost. Se ele enviar
+        # um sinal, a flag de trava (lock_red) fica ativa.
 
         # Enquanto a flag de liberação dos fantasmas não estiver ativa, não podem se movimentar
 
@@ -377,9 +380,11 @@ class Referee(object):
                     self.ghost_list.remove(self.red_ghost)
                     self.playKillSound()
                     break
-        # Fim do Jogo
 
     def blue_automata(self):
+
+        # A lógica do fantasma azul, segue basicamente a mesma lógica dos anteriores;
+        # Porém, ele se movimenta de maneira randômica no labirinto.
 
         while not self.go_ghosts:
             pass
@@ -413,9 +418,10 @@ class Referee(object):
                     self.playKillSound()
                     break
 
-                    # Fim do Jogo
-
     def orange_automata(self):
+
+        # O fantasma laranja, se movimenta de acordo com a direção que o Pac-Man se movimenta.
+        # Nesse caso, é sempre a direção contrária quando o Pac-Man muda de direção.
 
         while not self.go_ghosts:
             pass
@@ -449,9 +455,11 @@ class Referee(object):
                     self.ghost_list.remove(self.orange_ghost)
                     self.playKillSound()
                     break
-                    # Fim do Jogo
 
     def purple_automata(self):
+
+        # O fantasma roxo, segue a mesma lógica do fantasma vermelho, porem os sinais
+        # são recebidos do árbitro de 2 em 2 segundos.
 
         while not self.go_ghosts:
             pass
@@ -485,16 +493,20 @@ class Referee(object):
                     self.ghost_list.remove(self.purple_ghost)
                     self.playKillSound()
                     break
-        # Fim do Jogo
 
     def control_direction(self, color):
+
+        # Esta função é responsável pelo controle da direção dos fantasmas
+        # vermelho e roxo. Depois de um determinado intervalo de tempo, o árbitro
+        # define a direção dos fantasmas com base na posição absoluta do Pac-Man
+        # esta função tem prioridade para definir a direção.
 
         while not self.game_exit:
 
             if color == "red":
                 self.lock_red = False
 
-                time.sleep(5)
+                time.sleep(4)
 
                 self.lock_red = True
                 new_x, new_y, new_direction = self.move_ghosts("red")
@@ -514,9 +526,11 @@ class Referee(object):
                 self.purple_ghost.setX(new_x)
                 self.purple_ghost.setY(new_y)
 
-            #time.sleep(self.sleeptime)
-
     def power_pacman(self):
+
+        # Esta função implementa a capacidade do Pac-Man em se tornar invencível
+        # Caso ele coma uma fruta, ele entra neste modo, e pode comer os fantasmas
+        # O tempo que ele fica nesse estado é 10 Segundos.
 
         while not self.game_exit:
             if self.fruit_power:
@@ -535,6 +549,9 @@ class Referee(object):
 
     def gameLoop(self):
 
+        # Esta é a função onde é implementado o movimento do Pac-Man
+        # de acordo com as teclas pressionadas pelo usuário.
+
         pygame.init()
         pygame.mixer.init()
 
@@ -549,7 +566,6 @@ class Referee(object):
         aux_x = -1
         aux_y = -1
 
-    # Loop do jogo
         x_pressed = False
         while not self.game_exit:
             self.go_ghosts = True
@@ -683,6 +699,8 @@ class Referee(object):
 
     def move_ghosts(self, color):
 
+        # Esta função testa os movimentos dos fantasmas
+
         ghost = None
         border_collision = False
         pacman_collision = False
@@ -699,6 +717,11 @@ class Referee(object):
         elif color == "purple":
             ghost = copy(self.purple_ghost)
 
+        # Se o árbitro estiver dando o comando, a direção é definida de acordo
+        # com a função que testa as direções possíveis do fantasma, onde ela obtém
+        # a direção em que o fantasma fica mais próximo do Pac-Man. Com excessão do
+        # fantasma laranja, que se movimenta de acordo com o Pac-Man
+
         if self.lock_red and color == "red":
             current_dir = self.testGhostDirection("red")
 
@@ -707,6 +730,9 @@ class Referee(object):
 
         elif self.lock_purple and color == "purple":
             current_dir = self.testGhostDirection("purple")
+
+        # Caso contrário, ele pega a direção atual do Pac-Man,
+        # e testa qual a direção que ele pode se mover.
 
         else:
             current_dir = ghost.getDirection()
@@ -727,19 +753,21 @@ class Referee(object):
             ghost_x_change = -self.Screen.change_rate
             ghost_y_change = 0
 
+        # Atualiza a futura posição do fantasma
+
         ghost.setX(ghost.getX() + ghost_x_change)
         ghost.setY(ghost.getY() + ghost_y_change)
 
         # Verifica a coolisão com o Pacman
     
         dist = self.calcDist(self.pacman.getX(), self.pacman.getY(), ghost.getX(), ghost.getY())
-        if dist < 18:
+        if dist < 20:
             pacman_collision = True
             new_direction = "pac"
 
         if not pacman_collision:
 
-            # Verifica as bordas.
+            # Verifica a coolisão com bordas, caso não haja coolisão com o Pac-Man
 
             if ghost.getX() > self.Screen.boundarie_x_pacman:
                 ghost.setX(ghost.getX() - ghost_x_change)
@@ -771,6 +799,7 @@ class Referee(object):
 
             if not border_collision:
 
+                # Se não houveram coolisões com as bordas,
                 # Verifica a colisão com barreiras
 
                 if self.ghost_barrier_colision(ghost):
@@ -787,9 +816,13 @@ class Referee(object):
 
     def calcDist(self, g_x, g_y, p_x, p_y):
 
+        # Esta função calcula a distância de dois pontos
+
         return math.sqrt(math.pow((g_x - p_x), 2.0) + math.pow((g_y - p_y), 2.0))
 
     def ghost_barrier_colision(self, ghost):
+
+        # Esta função realiza o teste de coolisão dos fantasmas com barreiras
 
         if ghost.getX() > self.barrier_points1[1962][0]:
             b_points = self.barrier_points2
@@ -803,6 +836,9 @@ class Referee(object):
         return False
 
     def testGhostDirection(self, color):
+
+        # Esta função faz o teste da direção mais próxima do fantasma em relação
+        # ao Pac-Man
 
         ghost = None
 
