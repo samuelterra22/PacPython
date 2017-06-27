@@ -1,12 +1,12 @@
 # coding=utf-8
 """
 *************************************************************************************************
-*                   Trabalho 01 - Linguagens Formais e Autômatos Finitos                        *
+*                   Trabalho 02 - Linguagens Formais e Autômatos Finitos                        *
 *                                                                                               *
 *   @teacher: Walace Rodrigues                                                                  *
 *   @author: Matheus Calixto - ⁠⁠⁠0011233                                                          *
 *   @author: Samuel Terra    - 0011946                                                          *
-*   @lastUpdate: 25/05/2017                                                                     *
+*   @lastUpdate: 27/06/2017                                                                     *
 *                                                                                               *
 *************************************************************************************************
 """

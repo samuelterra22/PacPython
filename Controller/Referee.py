@@ -1,4 +1,16 @@
 # -*- coding: utf-8 -*-
+"""
+*************************************************************************************************
+*                   Trabalho 02 - Linguagens Formais e Autômatos Finitos                        *
+*                                                                                               *
+*   @teacher: Walace Rodrigues                                                                  *
+*   @author: Matheus Calixto - ⁠⁠⁠0011233                                                          *
+*   @author: Samuel Terra    - 0011946                                                          *
+*   @lastUpdate: 27/06/2017                                                                     *
+*                                                                                               *
+*************************************************************************************************
+"""
+
 import pygame, math, time
 import threading as Threads
 from Controller.AFDController import AFDController
@@ -22,9 +34,12 @@ class Referee(object):
         # Elementos da Tela
         self.Screen = ScreenControl()
 
+        # Display do jogo
+
         self.gameDisplay = self.Screen.buildDisplay()
 
-        # Powerfull fruits
+        # Frutas que dão poder ao Pac-Man
+
         self.banana = Fruits(640, 195, "banana")
         self.cherry = Fruits(170, 190, "cherry")
         self.pineaple = Fruits(282, 490, "pineaple")
@@ -52,11 +67,17 @@ class Referee(object):
 
         self.go_ghosts = False
 
+        # Flags que travam a escolha da direção dos fantasmas quando o árbitro envia um sinal
+
         self.lock_red = False
         self.lock_orange = False
         self.lock_purple = False
 
+        # Flag que controla quando o Pac-Man está sob efeito de seu poder oculto
+
         self.fruit_power = False
+
+        # Próxima direção do fantasma laranja depois do Pac-man se movimentar
 
         self.orange_next_dir = "up"
 
@@ -65,9 +86,11 @@ class Referee(object):
         self.aut_controller = AFDController()
 
         # Capsulas
+
         self.capsules = self.Screen.build_capsules()
 
         # Coordenadas das Barreiras
+
         self.barrier_points, self.barrier_points1, self.barrier_points2 = self.Screen.build_barrier_points()
 
         self.barriers = self.Screen.barriers
@@ -75,7 +98,56 @@ class Referee(object):
         # Vidas
         self.lifes = self.Screen.lifes
 
+    def thread_trigger(self):
+
+        # Função que dispara as Threads para o controle do jogo
+
+        # Thread AFD pacman
+
+        t_pacman = Threads.Thread(target=self.pacman_automata, args=())
+
+        # Thread para o Looping do jogo
+
+        t_game = Threads.Thread(target=self.gameLoop, args=())
+
+        # Thread para os fantasmas
+
+        t_red = Threads.Thread(target=self.red_automata, args=())
+
+        t_blue = Threads.Thread(target=self.blue_automata, args=())
+
+        t_orange = Threads.Thread(target=self.orange_automata, args=())
+
+        t_purple = Threads.Thread(target=self.purple_automata, args=())
+
+        # Thread para o controle dos sinais enviados pelo árbitro
+
+        t_control_red = Threads.Thread(target=self.control_direction, args=("red",))
+
+        t_control_purple = Threads.Thread(target=self.control_direction, args=("purple",))
+
+        # Thread para controlar o efeito do poder oculto do Pac-Man
+
+        t_power_mode = Threads.Thread(target=self.power_pacman, args=())
+
+        # Inicializa-se as Threads
+
+        t_game.start()
+        t_pacman.start()
+        t_red.start()
+        t_blue.start()
+        t_orange.start()
+        t_purple.start()
+        t_control_red.start()
+        t_control_purple.start()
+        t_power_mode.start()
+
     def endGame(self, status):
+
+        # Função que controla o fim do jogo
+
+        # Caso for uma vitória, é reproduzido um som específico de vitória, e na tela é
+        # Printada a frase 'YOU WIN!!!!', piscando algumas vezes. Depois disso, o jogo termina.
 
         if status == "win":
 
@@ -94,9 +166,11 @@ class Referee(object):
                     time.sleep(0.7)
                     count -= 1
                 self.draw_game(self.capsules, self.barriers)
-            # self.game_exit = True
-        else:
 
+        # Caso for uma derrota, é reproduzido um som específico de derrota, e na tela é
+        # Printada a frase 'YOU LOOOOOOSE', piscando algumas vezes. Depois disso, o jogo termina.
+
+        else:
             count = 5
             blink = False
             pygame.mixer.music.load(open("Sounds/oh_shit.wav", "rb"))
@@ -112,11 +186,12 @@ class Referee(object):
                     time.sleep(0.7)
                     count -= 1
                 self.draw_game(self.capsules, self.barriers)
-            # self.game_exit = True
-
-    # ------- * Construtor da lista de barreiras do labirinto ------- * #
 
     def playKillSound(self):
+
+        # Esta função, toca os sons determinados, para a quantidade de mortes
+        # que o Pac-Man causou nos fantasmas. A cada fantasma que ele come,
+        # um novo som é reproduzido, dando destaque ao feito do mesmo.
 
         ghosts_remaining = len(self.ghost_list)
 
@@ -138,6 +213,8 @@ class Referee(object):
 
     def setInitialPositions(self):
 
+        # Seta as posições iniciais do Pac-Man e dos fantasmas
+
         # Posições iniciais do Pac-Man
 
         self.pacman.setInitialPosition()
@@ -149,9 +226,10 @@ class Referee(object):
         self.orange_ghost.setInitialPosition("orange")
         self.purple_ghost.setInitialPosition("purple")
 
-    # -------- Contador do Placar -------- #
-
     def score_counter(self):
+
+        # Função responsável por exibir na tela o contador das cápsulas
+        # comidas pelo Pac-Man
 
         font = pygame.font.SysFont(None, 25)
         score = "Score: " + str(self.pacman.getCapsules())
@@ -159,6 +237,9 @@ class Referee(object):
         self.gameDisplay.blit(screen_text, [5, 680])
 
     def life_counter(self):
+
+        # Função responsável por mostrar o contador de vidas restantes
+        # que o Pac-Man possui.
 
         font = pygame.font.SysFont(None, 25)
         score = "Lifes: "
@@ -169,9 +250,9 @@ class Referee(object):
         screen_text = font.render(score, True, self.Screen.yellow)
         self.gameDisplay.blit(screen_text, [7, 627])
 
-    # -------- Desenha o jogo, atualizando as posições -------- #
-
     def draw_game(self, capsules, barriers):
+
+        # Esta função faz o desenho do cenário, a cada looping do jogo
 
         # Pinta o fundo da tela de preto
 
@@ -216,37 +297,52 @@ class Referee(object):
         for i in self.fruits:
             self.gameDisplay.blit(i.getImage(), (i.getX(), i.getY()))
 
-        pygame.display.update()
-
-        # FPS
+        # Atualiza o 'relógio' do jogo.
 
         self.Screen.clock.tick(self.Screen.fps)
 
-    # -------- Executa o autômato do Pac-man -------- #
+        # Após os novos desenhos, atualiza o cenário.
+
+        pygame.display.update()
 
     def pacman_automata(self):
 
+        # Função que executa o automato do Pac-Man
+
         # Se o pacman andou, o estado muda
 
+        # Enquanto o jogo não termina, executa-se o autômato.
         while not self.game_exit:
 
             if self.walk:
                 self.pacman.setState(self.aut_controller.move(self.pacman.getAFD(),
                                      self.pacman.getState(), self.pacman.getDirection()))
+            #time.sleep(self.sleeptime)
 
         # Fim do Jogo
 
     def red_automata(self):
 
+        # Função que roda o autômato do fantasma vermelho
+
+        # Enquanto a flag de liberação dos fantasmas não estiver ativa, não podem se movimentar
+
         while not self.go_ghosts:
             pass
 
+        # Deṕois da liberação, o autômato pode rodar.
+
         while not self.game_exit:
 
+            # Conta o relógio dos fantasmas
             self.Screen.clock.tick(self.Screen.fps_ghosts)
+
+            # Se caso o fantasma vermelho não estiver sob o controle do árbitro, ele
+            # recebe suas novas coordenadas, e caminha.
 
             if not self.lock_red:
 
+                # Recebe suas novas coordenadas e sua nova direção
                 new_x, new_y, new_direction = self.move_ghosts("red")
 
                 self.red_ghost.setDirection(new_direction)
@@ -256,8 +352,16 @@ class Referee(object):
                 self.red_ghost.setState(self.aut_controller.move(self.red_ghost.getAFD(),
                                                                  self.red_ghost.getState(),
                                                                  self.red_ghost.getDirection()))
+            # Se o fantasma vermelho topar com o Pac-Man, faz-se
+            # as verificações:
             if self.red_ghost.getDirection() == "pac":
 
+                # Se o Pac-Man, não está sob efeito do seu poder oculto,
+                # o mesmo perde uma vida, e o jogo reinicia com os objetos nas posições
+                # iniciais. Se não houverem mais vidas para consumir, o jogo termina e o
+                # usuário perdeu! Caso contrário, se o Pac-Man estiver sob efeito de seu
+                # poder, ele mata os fantasmas. O fantasma morto desaparece do mapa até o
+                # final do jogo!
                 if not self.fruit_power:
 
                     if len(self.lifes) > 0:
@@ -273,7 +377,6 @@ class Referee(object):
                     self.ghost_list.remove(self.red_ghost)
                     self.playKillSound()
                     break
-
         # Fim do Jogo
 
     def blue_automata(self):
@@ -309,7 +412,8 @@ class Referee(object):
                     self.ghost_list.remove(self.blue_ghost)
                     self.playKillSound()
                     break
-        # Fim do Jogo
+
+                    # Fim do Jogo
 
     def orange_automata(self):
 
@@ -410,6 +514,8 @@ class Referee(object):
                 self.purple_ghost.setX(new_x)
                 self.purple_ghost.setY(new_y)
 
+            #time.sleep(self.sleeptime)
+
     def power_pacman(self):
 
         while not self.game_exit:
@@ -426,46 +532,6 @@ class Referee(object):
                 self.purple_ghost.setImage("purple")
 
                 self.fruit_power = False
-
-    # -------- Looping principal do jogo -------- #
-
-    def thread_trigger(self):
-
-        # Dispara as Threads
-
-        # Thread AFD pacman
-
-        t_pacman = Threads.Thread(target=self.pacman_automata, args=())
-
-        # Thread Game Loop
-
-        t_game = Threads.Thread(target=self.gameLoop, args=())
-
-        # Thread para Autômato do fantasma vermelho
-
-        t_red = Threads.Thread(target=self.red_automata, args=())
-
-        t_blue = Threads.Thread(target=self.blue_automata, args=())
-
-        t_orange = Threads.Thread(target=self.orange_automata, args=())
-
-        t_purple = Threads.Thread(target=self.purple_automata, args=())
-
-        t_control_red = Threads.Thread(target=self.control_direction, args=("red",))
-
-        t_control_purple = Threads.Thread(target=self.control_direction, args=("purple",))
-
-        t_power_mode = Threads.Thread(target=self.power_pacman, args=())
-
-        t_game.start()
-        t_pacman.start()
-        t_red.start()
-        t_blue.start()
-        t_orange.start()
-        t_purple.start()
-        t_control_red.start()
-        t_control_purple.start()
-        t_power_mode.start()
 
     def gameLoop(self):
 

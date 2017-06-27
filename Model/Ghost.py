@@ -1,3 +1,16 @@
+# -*- coding: utf-8 -*-
+
+"""
+*************************************************************************************************
+*                   Trabalho 02 - Linguagens Formais e Autômatos Finitos                        *
+*                                                                                               *
+*   @teacher: Walace Rodrigues                                                                  *
+*   @author: Matheus Calixto - ⁠⁠⁠0011233                                                          *
+*   @author: Samuel Terra    - 0011946                                                          *
+*   @lastUpdate: 27/06/2017                                                                     *
+*                                                                                               *
+*************************************************************************************************
+"""
 from Controller.AFDController import AFDController
 import pygame
 

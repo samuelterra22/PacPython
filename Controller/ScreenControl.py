@@ -1,4 +1,15 @@
 # -*- coding: utf-8 -*-
+"""
+*************************************************************************************************
+*                   Trabalho 02 - Linguagens Formais e Autômatos Finitos                        *
+*                                                                                               *
+*   @teacher: Walace Rodrigues                                                                  *
+*   @author: Matheus Calixto - ⁠⁠⁠0011233                                                          *
+*   @author: Samuel Terra    - 0011946                                                          *
+*   @lastUpdate: 27/06/2017                                                                     *
+*                                                                                               *
+*************************************************************************************************
+"""
 import pygame
 
 class ScreenControl(object):
@@ -43,7 +54,7 @@ class ScreenControl(object):
         # FPS e blocos que os elementos móveis se movimentam por vez.
 
         self.change_rate = 10
-        self.fps = 30
+        self.fps = 15
         self.fps_ghosts = 10
 
         # Dimensões de Tela
@@ -181,20 +192,10 @@ class ScreenControl(object):
             capsules.append(((12 + dist_capsules), 509))
             dist_capsules += 40
 
-            # # Divide a lista de cápsulas em 2, para agilizar o procesamento.
-            #
-            # self.capsules.sort(key=lambda tup: tup[0])
-            #
-            # for i in range(0, len(self.capsules) / 2):
-            #     self.capsules1.append(self.capsules[i])
-            #
-            # for i in range(len(self.capsules) / 2, len(self.capsules)):
-            #     self.capsules2.append(self.capsules[i])
         return capsules
 
     def buildDisplay(self):
 
-        gameDisplay = None
         gameDisplay = pygame.display.set_mode((self.width, self.height))
         pygame.display.set_caption("PacPython \o/")
 
