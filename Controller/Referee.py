@@ -52,10 +52,10 @@ class Referee(object):
 
         # Inicializa os fantasmas
 
-        self.red_ghost = Ghost("red")  # De 5 em 5 segundos recebe a posição do pacman (absoluta)
-        self.blue_ghost = Ghost("blue")  # Random
-        self.orange_ghost = Ghost("orange")  # Sempre que o pacman muda de direção ele copia a direção contrária!
-        self.purple_ghost = Ghost("purple")  # Vai na direção do pacman
+        self.red_ghost = Ghost("red")
+        self.blue_ghost = Ghost("blue")
+        self.orange_ghost = Ghost("orange")
+        self.purple_ghost = Ghost("purple")
 
         self.ghost_list = [self.red_ghost, self.blue_ghost, self.orange_ghost, self.purple_ghost]
 
@@ -128,8 +128,6 @@ class Referee(object):
 
         # Thread para controlar o efeito do poder oculto do Pac-Man
 
-        t_power_mode = Threads.Thread(target=self.power_pacman, args=())
-
         # Inicializa-se as Threads
 
         t_game.start()
@@ -140,7 +138,6 @@ class Referee(object):
         t_purple.start()
         t_control_red.start()
         t_control_purple.start()
-        t_power_mode.start()
 
     def endGame(self, status):
 
@@ -526,32 +523,12 @@ class Referee(object):
                 self.purple_ghost.setX(new_x)
                 self.purple_ghost.setY(new_y)
 
-    def power_pacman(self):
-
-        # Esta função implementa a capacidade do Pac-Man em se tornar invencível
-        # Caso ele coma uma fruta, ele entra neste modo, e pode comer os fantasmas
-        # O tempo que ele fica nesse estado é 10 Segundos.
-
-        while not self.game_exit:
-            if self.fruit_power:
-
-                for g in self.ghost_list:
-                    g.setImage("white")
-
-                time.sleep(10)
-
-                self.red_ghost.setImage("red")
-                self.blue_ghost.setImage("blue")
-                self.orange_ghost.setImage("orange")
-                self.purple_ghost.setImage("purple")
-
-                self.fruit_power = False
-
     def gameLoop(self):
 
         # Esta é a função onde é implementado o movimento do Pac-Man
         # de acordo com as teclas pressionadas pelo usuário.
 
+        power_count = 0
         pygame.init()
         pygame.mixer.init()
 
@@ -680,14 +657,39 @@ class Referee(object):
                         self.capsules.remove(i)
                         break
 
-                # Verifica o ingerir das frutas
+                # Verifica o ingerir das frutas. Se o Pac-Man comer uma fruta, um contador é zerado
+                # e os fantasmas se transformam, podendo ser então comidos pelo Pac-Man por um
+                # determinado período de tempo
 
                 for i in self.fruits:
                     dist = self.calcDist(self.pacman.getX(), self.pacman.getY(), i.getX(), i.getY())
                     if dist < 30.0:
                         self.fruits.remove(i)
                         self.fruit_power = True
+                        for g in self.ghost_list:
+                            g.setImage("white")
+                        power_count = 0
                         break
+
+                # Se o Pac-Man estiver sob efeito do seu poder oculto
+                # O contador de "tempo" começa a correr
+
+                if self.fruit_power:
+                    power_count += 10
+
+                # Se o contador de 'tempo' chegar a 1000, o Pac-Man perde
+                # seu poder e os fantamas voltam ao seu estado natural, podendo
+                # comer o Pac-Man
+
+                if power_count == 1000:
+
+                    self.red_ghost.setImage("red")
+                    self.blue_ghost.setImage("blue")
+                    self.orange_ghost.setImage("orange")
+                    self.purple_ghost.setImage("purple")
+
+                    self.fruit_power = False
+
                 # Atualiza o Cenário
 
                 self.draw_game(self.capsules, self.barriers)
