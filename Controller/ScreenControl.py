@@ -55,7 +55,7 @@ class ScreenControl(object):
 
         self.change_rate = 10
         self.fps = 15
-        self.fps_ghosts = 10
+        self.fps_ghosts = 15
 
         # Dimensões de Tela
 

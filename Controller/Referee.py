@@ -364,7 +364,7 @@ class Referee(object):
                 # final do jogo!
                 if not self.fruit_power:
 
-                    if len(self.lifes) > 0:
+                    if len(self.lifes) > 1:
                         del self.lifes[len(self.lifes)-1]
                         pygame.mixer.music.load(open("Sounds/kill_pacman.wav", "rb"))
                         pygame.mixer.music.play()
@@ -372,6 +372,7 @@ class Referee(object):
 
                     else:
                         self.game_exit = True
+                        del self.lifes[len(self.lifes)-1]
                         self.endGame("lose")
                 else:
                     self.ghost_list.remove(self.red_ghost)
@@ -402,13 +403,14 @@ class Referee(object):
             if self.blue_ghost.getDirection() == "pac":
                 if not self.fruit_power:
 
-                    if len(self.lifes) > 0:
+                    if len(self.lifes) > 1:
                         del self.lifes[len(self.lifes)-1]
                         pygame.mixer.music.load(open("Sounds/kill_pacman.wav", "rb"))
                         pygame.mixer.music.play()
                         self.setInitialPositions()
                     else:
                         self.game_exit = True
+                        del self.lifes[len(self.lifes)-1]
                         self.endGame("lose")
                 else:
                     self.ghost_list.remove(self.blue_ghost)
@@ -440,13 +442,14 @@ class Referee(object):
             if self.orange_ghost.getDirection() == "pac":
                 if not self.fruit_power:
 
-                    if len(self.lifes) > 0:
+                    if len(self.lifes) > 1:
                         del self.lifes[len(self.lifes)-1]
                         pygame.mixer.music.load(open("Sounds/kill_pacman.wav", "rb"))
                         pygame.mixer.music.play()
                         self.setInitialPositions()
                     else:
                         self.game_exit = True
+                        del self.lifes[len(self.lifes)-1]
                         self.endGame("lose")
                 else:
                     self.ghost_list.remove(self.orange_ghost)
@@ -478,13 +481,14 @@ class Referee(object):
             if self.purple_ghost.getDirection() == "pac":
                 if not self.fruit_power:
 
-                    if len(self.lifes) > 0:
+                    if len(self.lifes) > 1:
                         del self.lifes[len(self.lifes)-1]
                         pygame.mixer.music.load(open("Sounds/kill_pacman.wav", "rb"))
                         pygame.mixer.music.play()
                         self.setInitialPositions()
                     else:
                         self.game_exit = True
+                        del self.lifes[len(self.lifes)-1]
                         self.endGame("lose")
                 else:
                     self.ghost_list.remove(self.purple_ghost)
